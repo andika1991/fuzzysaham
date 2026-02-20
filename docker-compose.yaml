@@ -1,0 +1,67 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: mysql
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    depends_on:
+      - mysql
+    env_file:
+      - .env
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: ${DB_PORT}
+      PMA_USER: ${DB_USER}
+      PMA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:80"
+
+  sentiment_service:
+    build: ./sentiment_service
+    container_name: sentiment_service
+    restart: always
+    depends_on:
+      - mysql
+    env_file:
+      - .env
+    ports:
+      - "5001:5000"
+
+  fuzzy_service:
+    build: ./fuzzy_service
+    container_name: fuzzy_service
+    restart: always
+    depends_on:
+      - mysql
+    env_file:
+      - .env
+    ports:
+      - "5002:5000"
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: always
+    depends_on:
+      - sentiment_service
+      - fuzzy_service
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+
+volumes:
+  mysql_data:

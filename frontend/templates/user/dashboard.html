@@ -1,0 +1,189 @@
+{% extends 'user/layout/base.html' %}
+
+{% block content %}
+
+<!-- ================= SUMMARY CARDS ================= -->
+<div class="row g-4">
+
+    <div class="col-md-3">
+        <div class="dashboard-card card-blue p-4">
+            <h6>Total Saham</h6>
+            <h3>45</h3>
+            <small>Dataset LQ45</small>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="dashboard-card card-green p-4">
+            <h6>Rata-rata Skor</h6>
+            <h3>72.4</h3>
+            <small>Metode Fuzzy</small>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="dashboard-card card-orange p-4">
+            <h6>Top Rank</h6>
+            <h3>BBCA</h3>
+            <small>Skor 89.2</small>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="dashboard-card bg-dark text-white p-4">
+            <h6>Update Data</h6>
+            <h3>14 Feb 2026</h3>
+            <small>Snapshot Terakhir</small>
+        </div>
+    </div>
+
+</div>
+
+<hr class="my-5">
+
+<!-- ================= CHART SECTION ================= -->
+<div class="row g-4">
+
+    <div class="col-md-6">
+        <div class="card p-4 shadow-sm border-0 rounded-4">
+            <h6 class="mb-3">Indeks Harga Saham Gabungan (IHSG)</h6>
+            <div id="ihsg_chart"></div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card p-4 shadow-sm border-0 rounded-4">
+            <h6 class="mb-3">Indeks LQ45</h6>
+            <div id="lq45_chart"></div>
+        </div>
+    </div>
+
+</div>
+
+<hr class="my-5">
+
+<!-- ================= RANKING & MOVERS ================= -->
+<div class="row g-4">
+
+    <!-- Ranking Top 5 -->
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-4 p-4">
+            <h6 class="mb-3">🏆 Top 5 Ranking Saham</h6>
+
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Kode</th>
+                        <th>Skor</th>
+                        <th>Kategori</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>BBCA</td>
+                        <td>89.2</td>
+                        <td><span class="badge bg-success">Sangat Layak</span></td>
+                    </tr>
+                    <tr>
+                        <td>BBRI</td>
+                        <td>85.1</td>
+                        <td><span class="badge bg-success">Layak</span></td>
+                    </tr>
+                    <tr>
+                        <td>TLKM</td>
+                        <td>80.4</td>
+                        <td><span class="badge bg-primary">Baik</span></td>
+                    </tr>
+                    <tr>
+                        <td>BMRI</td>
+                        <td>78.6</td>
+                        <td><span class="badge bg-primary">Baik</span></td>
+                    </tr>
+                    <tr>
+                        <td>ASII</td>
+                        <td>75.3</td>
+                        <td><span class="badge bg-warning text-dark">Cukup</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Gainer & Loser -->
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-4 p-4">
+            <h6 class="mb-3">📈📉 Top Gainer & Loser (Dataset)</h6>
+
+            <div class="row">
+                <div class="col-6">
+                    <h6 class="text-success">Top Gainer</h6>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            BBCA <span class="text-success">+2.45%</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            BBRI <span class="text-success">+1.90%</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-6">
+                    <h6 class="text-danger">Top Loser</h6>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            UNVR <span class="text-danger">-1.80%</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            ANTM <span class="text-danger">-1.45%</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<hr class="my-5">
+
+<!-- ================= AI INSIGHT ================= -->
+<div class="card shadow-sm border-0 rounded-4 p-4 bg-light">
+    <h6 class="mb-3">🤖 Insight Sistem</h6>
+    <p class="text-muted mb-0">
+        Berdasarkan perhitungan metode Fuzzy Mamdani, sektor perbankan menunjukkan
+        skor dominan tinggi pada kriteria profitabilitas dan stabilitas harga.
+        Saham BBCA direkomendasikan sebagai pilihan utama dalam periode analisis ini.
+    </p>
+</div>
+
+<!-- ================= TRADING VIEW ================= -->
+<script src="https://s3.tradingview.com/tv.js"></script>
+
+<script>
+new TradingView.widget({
+    "width": "100%",
+    "height": 350,
+    "symbol": "IDX:COMPOSITE",
+    "interval": "D",
+    "timezone": "Asia/Jakarta",
+    "theme": "light",
+    "style": "1",
+    "locale": "id",
+    "container_id": "ihsg_chart"
+});
+
+new TradingView.widget({
+    "width": "100%",
+    "height": 350,
+    "symbol": "IDX:LQ45",
+    "interval": "D",
+    "timezone": "Asia/Jakarta",
+    "theme": "light",
+    "style": "1",
+    "locale": "id",
+    "container_id": "lq45_chart"
+});
+</script>
+
+{% endblock %}

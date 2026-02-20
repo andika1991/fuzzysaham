@@ -1,0 +1,48 @@
+:root {
+  --primary: #2F6FED;
+  --dark: #1F2937;
+  --bg: #F4F6F8;
+  --text: #111827;
+  --muted: #6B7280;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", sans-serif;
+}
+
+.text-primary {
+  color: var(--primary) !important;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border: none;
+}
+
+.hero-section {
+  background-color: #ECECEC;
+  padding: 60px 0;
+}
+
+.feature-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.06);
+}
+
+.mock-box {
+  margin-top: 10px;
+  padding: 12px;
+  background: #F9FAFB;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.footer {
+  background-color: var(--dark);
+  color: white;
+  padding: 16px 0;
+}

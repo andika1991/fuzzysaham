@@ -1,0 +1,6 @@
+flask
+requests
+pandas
+scikit-learn
+Sastrawi
+mysql-connector-python

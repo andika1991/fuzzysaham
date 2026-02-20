@@ -1,0 +1,170 @@
+{% extends 'user/layout/base.html' %}
+
+{% block content %}
+
+<div class="mb-4">
+    <h4 class="mb-1">Ranking Saham LQ45</h4>
+    <small class="text-muted">
+        Berdasarkan hasil perhitungan Fuzzy Mamdani (Hari Ini)
+    </small>
+</div>
+
+<!-- SUMMARY -->
+<div class="row g-4 mb-5">
+
+    <div class="col-md-4">
+        <div class="dashboard-card card-blue p-4">
+            <h6>Total Saham</h6>
+            <h3>{{ ranking|length }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="dashboard-card card-green p-4">
+            <h6>Skor Tertinggi</h6>
+            {% if ranking %}
+                <h3>{{ "%.4f"|format(ranking[0].fuzzy_score) }}</h3>
+            {% else %}
+                <h3>-</h3>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-4">
+    <div class="dashboard-card card-orange p-4">
+        <h6>Tanggal Ranking</h6>
+        {% if ranking %}
+            <h6>{{ ranking[0].created_at.strftime('%d %B %Y') }}</h6>
+        {% else %}
+            <h6>-</h6>
+        {% endif %}
+    </div>
+</div>
+
+
+</div>
+
+<!-- LIST CARD -->
+<div class="row g-4">
+
+{% if ranking|length == 0 %}
+    <div class="col-12 text-center text-muted py-5">
+        Tidak ada data ranking hari ini
+    </div>
+{% endif %}
+
+{% for saham in ranking %}
+
+<div class="col-12">
+
+    <a href="{{ url_for('user.detail_saham', ticker=saham.ticker) }}"
+       class="text-decoration-none text-dark">
+
+        <div class="card border-0 rounded-4 p-4 ranking-card 
+            {% if loop.index == 1 %}top-ranked{% endif %}">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <!-- LEFT SECTION -->
+                <div class="d-flex align-items-center">
+
+                    <!-- Medal -->
+                    <div class="me-3 fs-4">
+                        {% if loop.index == 1 %}
+                            🥇
+                        {% elif loop.index == 2 %}
+                            🥈
+                        {% elif loop.index == 3 %}
+                            🥉
+                        {% else %}
+                            #{{ loop.index }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Logo -->
+                    <div class="logo-wrapper me-3">
+                        <img src="{{ url_for('static', filename='logo/' ~ saham.ticker ~ '.png') }}"
+                             alt="{{ saham.ticker }}"
+                             class="logo-img"
+                             onerror="this.onerror=null;this.src='{{ url_for('static', filename='logo/default.png') }}';">
+                    </div>
+
+                    <!-- Nama -->
+                    <div>
+                        <h6 class="mb-0 fw-bold">{{ saham.ticker }}</h6>
+                        <small class="text-muted">
+                            {{ saham.nama_perusahaan }}
+                        </small>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT SECTION -->
+                <div class="text-end">
+
+                    <!-- Harga -->
+                    <div class="fw-bold fs-5">
+                        Rp {{ "{:,.0f}".format(saham.close_price) }}
+                    </div>
+
+                    <!-- Skor -->
+                    <div class="mt-2">
+                        <small class="text-muted">Skor Fuzzy</small>
+
+                        <div class="progress mt-1" style="height:6px; width:170px;">
+                            <div class="progress-bar 
+                                {% if saham.fuzzy_score >= 0.8 %}
+                                    bg-success
+                                {% elif saham.fuzzy_score >= 0.6 %}
+                                    bg-warning
+                                {% else %}
+                                    bg-danger
+                                {% endif %}
+                            "
+                            style="width: {{ saham.fuzzy_score * 100 }}%;">
+                            </div>
+                        </div>
+
+                        <small class="fw-semibold">
+                            {{ "%.4f"|format(saham.fuzzy_score) }}
+                        </small>
+                    </div>
+
+                    <!-- Horizon -->
+                    <div class="mt-2">
+                        {% if saham.horizon %}
+                            <span class="badge bg-info px-3 py-2 me-1">
+                                {{ saham.horizon }}
+                            </span>
+                        {% endif %}
+
+                        {% if saham.kategori == "Potensial" %}
+                            <span class="badge bg-success px-3 py-2">
+                                {{ saham.kategori }}
+                            </span>
+                        {% elif saham.kategori == "Netral" %}
+                            <span class="badge bg-warning text-dark px-3 py-2">
+                                {{ saham.kategori }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary px-3 py-2">
+                                {{ saham.kategori }}
+                            </span>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </a>
+
+</div>
+
+{% endfor %}
+
+
+</div>
+
+{% endblock %}

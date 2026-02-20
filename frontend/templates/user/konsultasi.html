@@ -1,0 +1,200 @@
+{% extends 'user/layout/base.html' %}
+{% block content %}
+
+<div class="chat-container">
+
+    <!-- SIDEBAR -->
+    <div class="chat-sidebar">
+
+        <button class="new-chat-btn"
+            onclick="window.location.href='/user/new-chat'">
+            + New Chat
+        </button>
+
+   {% for convo in conversations %}
+<div class="conversation-item 
+    {% if active_conversation and convo.conversation_id == active_conversation.conversation_id %}
+        active
+    {% endif %}
+">
+
+    <div class="d-flex justify-content-between align-items-center">
+
+        <div class="convo-title"
+            onclick="window.location.href='/user/konsultasi/{{ convo.conversation_id }}'">
+            Chat #{{ convo.conversation_id }}
+        </div>
+
+        <span class="delete-btn"
+              onclick="deleteConversation({{ convo.conversation_id }})">
+            🗑
+        </span>
+
+    </div>
+</div>
+{% endfor %}
+
+
+    </div>
+
+    <!-- MAIN CHAT -->
+    <div class="chat-main">
+         <input type="hidden" id="conversation-id"
+           value="{{ active_conversation.conversation_id if active_conversation else '' }}">
+
+        <div class="chat-header">
+            🤖 FuzzyInvest AI
+        </div>
+
+        <div id="chat-box" class="chat-body">
+
+{% for msg in messages %}
+    <div class="chat-message {{ msg.sender }}">
+        <div class="bubble markdown-content">
+            {{ msg.message_text | safe }}
+        </div>
+    </div>
+{% endfor %}
+
+
+        </div>
+
+        <div class="chat-footer">
+            <input type="text" id="user-input"
+                   placeholder="Tanyakan tentang saham LQ45..."
+                   onkeypress="if(event.key==='Enter') sendMessage()">
+                   
+            <button onclick="sendMessage()">Kirim</button>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+async function sendMessage() {
+
+    const input = document.getElementById("user-input");
+    const message = input.value.trim();
+    const convoInput = document.getElementById("conversation-id");
+
+    if (!message) return;
+
+    addMessage("user", message);
+    input.value = "";
+
+    showTyping();
+
+    try {
+
+        const response = await fetch("/user/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: message,
+                conversation_id: convoInput.value || null
+            })
+        });
+
+        const data = await response.json();
+
+        removeTyping();
+        addMessage("bot", data.reply);
+
+        // 🔥 simpan conversation id
+        convoInput.value = data.conversation_id;
+
+        // 🔥 update URL tanpa reload
+        window.history.replaceState(
+            null,
+            "",
+            "/user/konsultasi/" + data.conversation_id
+        );
+
+    } catch (error) {
+        removeTyping();
+        addMessage("bot", "Terjadi kesalahan.");
+    }
+}
+
+
+function addMessage(sender, text) {
+
+    const chatBox = document.getElementById("chat-box");
+    const msg = document.createElement("div");
+
+    msg.classList.add("chat-message", sender);
+
+    let formattedText = sender === "bot"
+        ? marked.parse(text)
+        : text;
+
+    msg.innerHTML = `
+        <div class="bubble">${formattedText}</div>
+        <div class="time">${new Date().toLocaleTimeString()}</div>
+    `;
+
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+
+function showTyping() {
+    const chatBox = document.getElementById("chat-box");
+
+    const typing = document.createElement("div");
+    typing.id = "typing";
+    typing.classList.add("chat-message", "bot");
+    typing.innerHTML = `<div class="bubble typing">Mengetik...</div>`;
+
+    chatBox.appendChild(typing);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function removeTyping() {
+    const typing = document.getElementById("typing");
+    if (typing) typing.remove();
+}
+
+async function deleteConversation(convoId) {
+
+    if (!confirm("Hapus percakapan ini?")) return;
+
+    const response = await fetch(`/user/delete-conversation/${convoId}`, {
+        method: "POST"
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+
+        // kalau yang aktif dihapus → redirect ke new chat
+        const activeId = document.getElementById("conversation-id")?.value;
+
+        if (activeId == convoId) {
+            window.location.href = "/user/new-chat";
+        } else {
+            location.reload();
+        }
+    }
+}
+
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const markdownElements = document.querySelectorAll(".markdown-content");
+
+    markdownElements.forEach(el => {
+        el.innerHTML = marked.parse(el.innerHTML);
+    });
+
+});
+</script>
+
+{% endblock %}

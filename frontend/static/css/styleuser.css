@@ -1,0 +1,75 @@
+body {
+    background-color: #f1f5f9;
+    font-family: 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+    color: white;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar .nav-link {
+    color: rgba(255,255,255,0.8);
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: 0.2s;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+}
+
+.sidebar.collapsed .nav-text {
+    display: none;
+}
+
+/* Topbar */
+.topbar {
+    background: white;
+    padding: 12px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Cards */
+.dashboard-card {
+    border-radius: 16px;
+    border: none;
+    padding: 20px;
+    color: white;
+    transition: 0.3s;
+}
+
+.card-blue {
+    background: linear-gradient(135deg, #4e73df, #224abe);
+}
+
+.card-green {
+    background: linear-gradient(135deg, #1cc88a, #13855c);
+}
+
+.card-orange {
+    background: linear-gradient(135deg, #f6c23e, #dda20a);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Toggle button */
+.toggle-btn {
+    cursor: pointer;
+    font-size: 22px;
+}

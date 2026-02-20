@@ -1,0 +1,30 @@
+{% extends 'layouthome/base.html' %}
+
+{% block title %}Beranda - FuzzyInvest{% endblock %}
+
+{% block content %}
+
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-7">
+        <h1 class="fw-bold mb-3">FuzzyInvest LQ45</h1>
+        <p class="text-muted fs-5">
+          Sistem Pendukung Keputusan Investasi<br>
+          Saham LQ45 Berbasis Fuzzy Mamdani
+        </p>
+      </div>
+      <div class="col-md-5 text-md-end mt-3 mt-md-0">
+        <button class="btn btn-primary btn-lg px-4"
+                data-bs-toggle="modal"
+                data-bs-target="#loginModal">
+          Mulai
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5"> <div class="container"> <h5 class="text-center mb-4 fw-semibold"> Apa yang kamu dapatkan...? </h5> <div class="row g-4"> <!-- CARD 1 --> <div class="col-md-4"> <div class="card feature-card h-100"> <div class="card-body"> <h6 class="fw-bold mb-2">📊 Ranking Saham LQ45</h6> <p class="text-muted small"> Menampilkan peringkat saham LQ45 berdasarkan hasil perhitungan metode Fuzzy Mamdani. </p> <div class="mock-box">Ranking Preview</div> </div> </div> </div> <!-- CARD 2 --> <div class="col-md-4"> <div class="card feature-card h-100"> <div class="card-body"> <h6 class="fw-bold mb-2">📈 Data Saham LQ45</h6> <p class="text-muted small"> Menyediakan informasi saham LQ45 dan nilai kriteria yang digunakan dalam proses fuzzy. </p> <div class="mock-box">Data Preview</div> </div> </div> </div> <!-- CARD 3 --> <div class="col-md-4"> <div class="card feature-card h-100"> <div class="card-body"> <h6 class="fw-bold mb-2">🤖 Insight AI</h6> <p class="text-muted small"> Memberikan ringkasan hasil analisis berbasis fuzzy yang mudah dipahami pengguna. </p> <div class="mock-box"> Saham BBCA memiliki skor tinggi... </div> </div> </div> </div> </div> </div> </section>
+
+{% endblock %}
