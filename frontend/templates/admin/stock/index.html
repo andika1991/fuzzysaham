@@ -1,0 +1,215 @@
+{% extends 'admin/layout/base.html' %}
+{% set active_menu = 'ticker' %}
+
+{% block extra_style %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+    }
+    .page-subtitle {
+        color: #64748b;
+        margin: 5px 0 0;
+    }
+    .btn-add {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+    }
+    .card-table {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .table thead th {
+        background: #f8fafc;
+        border: none;
+        padding: 15px;
+        font-weight: 600;
+        font-size: 13px;
+        color: #475569;
+    }
+    .table tbody td {
+        padding: 15px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+    .table tbody tr:hover {
+        background: #f8fafc;
+    }
+    .ticker-badge {
+        background: #e0e7ff;
+        color: #667eea;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+    }
+    .sektor-badge {
+        background: #f1f5f9;
+        color: #64748b;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+    }
+    .btn-action {
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .btn-edit {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    .btn-edit:hover {
+        background: #fde68a;
+    }
+    .btn-delete {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    .btn-delete:hover {
+        background: #fecaca;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 15px;
+    }
+    .search-box {
+        position: relative;
+        max-width: 300px;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 10px 15px 10px 40px;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 14px;
+    }
+    .search-box input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    .search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h4 class="page-title">📊 Kelola Saham LQ45</h4>
+        <p class="page-subtitle">Kelola data saham LQ45</p>
+    </div>
+    <a href="{{ url_for('admin_stock.create') }}" class="btn-add">
+        <i class="bi bi-plus-lg"></i>Tambah Data
+    </a>
+</div>
+
+<div class="search-box mb-3">
+    <i class="bi bi-search"></i>
+    <input type="text" id="searchInput" placeholder="Cari ticker atau nama..." onkeyup="searchTable()">
+</div>
+
+<div class="card-table">
+    <div class="table-responsive">
+        <table class="table table-hover" id="stockTable">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width: 50px;">No</th>
+                    <th>Ticker</th>
+                    <th>Nama Perusahaan</th>
+                    <th>Sektor</th>
+                    <th>Industri</th>
+                    <th class="text-center" style="width: 150px;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in stocks %}
+                <tr>
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td><span class="ticker-badge">{{ s.ticker }}</span></td>
+                    <td><strong>{{ s.nama_perusahaan }}</strong></td>
+                    <td><span class="sektor-badge">{{ s.sektor or '-' }}</span></td>
+                    <td>{{ s.industri or '-' }}</td>
+                    <td class="text-center">
+                        <a href="{{ url_for('admin_stock.edit', id=s.id_stock) }}" class="btn-action btn-edit">
+                            <i class="bi bi-pencil"></i>Edit
+                        </a>
+                        <form action="{{ url_for('admin_stock.delete', id=s.id_stock) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin hapus data ini?');">
+                            <button type="submit" class="btn-action btn-delete">
+                                <i class="bi bi-trash"></i>Hapus
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% if not stocks %}
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>Belum ada data saham</p>
+            <a href="{{ url_for('admin_stock.create') }}" class="btn btn-primary">Tambah Data</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function searchTable() {
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toUpperCase();
+    const table = document.getElementById('stockTable');
+    const rows = table.getElementsByTagName('tr');
+    
+    for (let i = 1; i < rows.length; i++) {
+        const ticker = rows[i].cells[1].textContent.toUpperCase();
+        const nama = rows[i].cells[2].textContent.toUpperCase();
+        
+        if (ticker.indexOf(filter) > -1 || nama.indexOf(filter) > -1) {
+            rows[i].style.display = '';
+        } else {
+            rows[i].style.display = 'none';
+        }
+    }
+}
+</script>
+{% endblock %}

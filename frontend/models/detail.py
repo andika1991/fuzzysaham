@@ -3,56 +3,60 @@ from db import get_db
 class StockDetail:
 
     @staticmethod
-    def get_detail_by_ticker(ticker):
+    def get_detail_by_ticker(ticker, tanggal=None):
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
 
-        # 🔥 Ambil stockdata terakhir berdasarkan ticker
-        cursor.execute("""
+        query = """
             SELECT 
                 fo.output_id,
                 fo.fuzzy_score,
                 fo.kategori,
                 fo.horizon,
-                fo.insight,
                 fo.created_at,
-                sd.*,
-                s.nama_perusahaan,
+                fo.insight,
+
                 s.ticker,
-                s.sektor
+                s.nama_perusahaan,
+
+                sd.close_price,
+                sd.eps,
+                sd.per,
+                sd.roe,
+                sd.der,
+                sd.fcf,
+                sd.ma50,
+                sd.ma200,
+                sd.rsi,
+                sd.volume
+
             FROM fuzzy_output fo
-            JOIN stock_data sd 
+            JOIN stock_data sd
                 ON fo.stockdata_id = sd.stockdata_id
-            JOIN stock_lq45 s 
+            JOIN stock_lq45 s
                 ON sd.id_stock = s.id_stock
             WHERE s.ticker = %s
+        """
+
+        params = [ticker]
+
+        if tanggal:
+            query += " AND DATE(fo.created_at) = %s"
+            params.append(tanggal)
+
+        query += """
             ORDER BY fo.created_at DESC
             LIMIT 1
-        """, (ticker,))
+        """
 
-        detail = cursor.fetchone()
-
-        if not detail:
-            cursor.close()
-            conn.close()
-            return None, None
-
-        stockdata_id = detail["stockdata_id"]
-
-        # 🔥 Ambil fuzzy membership
-        cursor.execute("""
-            SELECT *
-            FROM fuzzy_membership
-            WHERE stockdata_id = %s
-        """, (stockdata_id,))
-
-        membership = cursor.fetchall()
+        cursor.execute(query, tuple(params))
+        result = cursor.fetchone()
 
         cursor.close()
         conn.close()
 
-        return detail, membership
-    
+        return result
+
     @staticmethod
     def get_recent_news(ticker):
         conn = get_db()
@@ -72,3 +76,40 @@ class StockDetail:
         conn.close()
 
         return news
+
+    @staticmethod
+    def get_membership_by_ticker(ticker, tanggal=None):
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT 
+                fm.*
+            FROM fuzzy_membership fm
+            JOIN fuzzy_output fo
+                ON fm.stockdata_id = fo.stockdata_id
+            JOIN stock_data sd
+                ON fo.stockdata_id = sd.stockdata_id
+            JOIN stock_lq45 s
+                ON sd.id_stock = s.id_stock
+            WHERE s.ticker = %s
+        """
+
+        params = [ticker]
+
+        if tanggal:
+            query += " AND DATE(fo.created_at) = %s"
+            params.append(tanggal)
+
+        query += """
+            ORDER BY fo.created_at DESC
+            LIMIT 1
+        """
+
+        cursor.execute(query, tuple(params))
+        result = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return result

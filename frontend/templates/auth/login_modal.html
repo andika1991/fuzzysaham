@@ -1,28 +1,39 @@
-<div class="modal fade" id="loginModal" tabindex="-1">
+<div class="modal fade auth-modal" id="loginModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
+    <div class="modal-content auth-modal-content">
 
       <form method="POST" action="/login">
-        <div class="modal-header">
-          <h5 class="modal-title fw-bold">Login Pengguna</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="auth-modal-header">
+
+          <div>
+            <h5 class="modal-title fw-bold mb-1">Login Pengguna</h5>
+            <p class="text-muted mb-0">Masuk untuk melihat dashboard dan hasil analisis saham.</p>
+          </div>
+
+          <button type="button" class="btn-close auth-close" data-bs-dismiss="modal"></button>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-body auth-modal-body">
           <div class="mb-3">
             <label class="form-label">Username</label>
-            <input type="text" name="username" class="form-control" required>
+            <div class="auth-input">
+              <i class="bi bi-person"></i>
+              <input type="text" name="username" class="form-control" placeholder="Masukkan username" required>
+            </div>
           </div>
 
-          <div class="mb-3">
+          <div class="mb-1">
             <label class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" required>
+            <div class="auth-input">
+              <i class="bi bi-lock"></i>
+              <input type="password" name="password" class="form-control" placeholder="Masukkan password" required>
+            </div>
           </div>
         </div>
 
-        <div class="modal-footer d-flex flex-column">
-          <button type="submit" class="btn btn-primary w-100">
-            Login
+        <div class="modal-footer auth-modal-footer">
+          <button type="submit" class="btn btn-primary w-100 auth-submit">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Login
           </button>
 
           <small class="text-muted mt-2">

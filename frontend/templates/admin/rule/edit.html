@@ -1,0 +1,115 @@
+{% extends 'admin/layout/base.html' %}
+{% set active_menu = 'rule' %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h4 class="mb-3">✏️ Edit Rule</h4>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form method="POST" action="{{ url_for('admin_rule.update', id=rule.id_rule) }}">
+
+                <div class="row">
+
+                    <!-- FUNDAMENTAL -->
+                    <div class="col-md-4 mb-3">
+                        <label>EPS</label>
+                        <input type="text" name="eps" class="form-control" value="{{ rule.eps }}">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>PER</label>
+                        <input type="text" name="per" class="form-control" value="{{ rule.per }}">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>ROE</label>
+                        <input type="text" name="roe" class="form-control" value="{{ rule.roe }}">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>DER</label>
+                        <input type="text" name="der" class="form-control" value="{{ rule.der }}">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>FCF</label>
+                        <input type="text" name="fcf" class="form-control" value="{{ rule.fcf }}">
+                    </div>
+
+                    <!-- TEKNIKAL -->
+                    <div class="col-md-4 mb-3">
+                        <label>MA50</label>
+                        <input type="text" name="ma50" class="form-control" value="{{ rule.ma50 }}">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>MA200</label>
+                        <input type="text" name="ma200" class="form-control" value="{{ rule.ma200 }}">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Volume</label>
+                        <select name="volume" class="form-control">
+                            <option value="">-- Pilih --</option>
+                            <option value="low" {{ 'selected' if rule.volume=='low' }}>Low</option>
+                            <option value="medium" {{ 'selected' if rule.volume=='medium' }}>Medium</option>
+                            <option value="high" {{ 'selected' if rule.volume=='high' }}>High</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>RSI</label>
+                        <select name="rsi" class="form-control">
+                            <option value="">-- Pilih --</option>
+                            <option value="oversold" {{ 'selected' if rule.rsi=='oversold' }}>Oversold</option>
+                            <option value="netral" {{ 'selected' if rule.rsi=='netral' }}>Netral</option>
+                            <option value="overbought" {{ 'selected' if rule.rsi=='overbought' }}>Overbought</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Sentimen</label>
+                        <select name="sentimen" class="form-control">
+                            <option value="">-- Pilih --</option>
+                            <option value="positif" {{ 'selected' if rule.sentimen=='positif' }}>Positif</option>
+                            <option value="netral" {{ 'selected' if rule.sentimen=='netral' }}>Netral</option>
+                            <option value="negatif" {{ 'selected' if rule.sentimen=='negatif' }}>Negatif</option>
+                        </select>
+                    </div>
+
+                    <!-- OUTPUT -->
+                    <div class="col-md-4 mb-3">
+                        <label>Output</label>
+                        <select name="output" class="form-control" required>
+                            <option value="bullish" {{ 'selected' if rule.output=='bullish' }}>Bullish</option>
+                            <option value="bearish" {{ 'selected' if rule.output=='bearish' }}>Bearish</option>
+                            <option value="sideways" {{ 'selected' if rule.output=='sideways' }}>Sideways</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Horizon</label>
+                        <select name="horizon" class="form-control" required>
+                            <option value="short" {{ 'selected' if rule.horizon=='short' }}>Short</option>
+                            <option value="medium" {{ 'selected' if rule.horizon=='medium' }}>Medium</option>
+                            <option value="long" {{ 'selected' if rule.horizon=='long' }}>Long</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="mt-3">
+                    <button class="btn btn-primary">🔄 Update</button>
+                    <a href="{{ url_for('admin_rule.index') }}" class="btn btn-secondary">Kembali</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

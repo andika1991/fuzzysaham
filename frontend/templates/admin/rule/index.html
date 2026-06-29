@@ -1,0 +1,172 @@
+{% extends 'admin/layout/base.html' %}
+{% set active_menu = 'rulebase' %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0">🧠 Rule Base</h4>
+            <small class="text-muted">Manajemen aturan sistem rekomendasi saham</small>
+        </div>
+
+        <a href="{{ url_for('admin_rule.create') }}" class="btn btn-primary shadow-sm">
+            + Tambah Rule
+        </a>
+    </div>
+
+    <!-- CARD -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table id="ruleTable" class="table table-hover align-middle">
+
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th>ID</th>
+                            <th>EPS</th>
+                            <th>PER</th>
+                            <th>ROE</th>
+                            <th>DER</th>
+                            <th>FCF</th>
+                            <th>MA50</th>
+                            <th>MA200</th>
+                            <th>Gradient</th>
+                            <th>Volume</th>
+                            <th>RSI</th>
+                            <th>Sentimen</th>
+                            <th>Output</th>
+                            <th>Horizon</th>
+                            <th width="120">Aksi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for r in rules %}
+                        <tr>
+
+                            <td class="fw-bold text-center">{{ r.id_rule }}</td>
+
+                            <!-- Fundamental -->
+                            <td>{{ r.eps or '-' }}</td>
+                            <td>{{ r.per or '-' }}</td>
+                            <td>{{ r.roe or '-' }}</td>
+                            <td>{{ r.der or '-' }}</td>
+                            <td>{{ r.fcf or '-' }}</td>
+
+                            <!-- Teknikal -->
+                            <td><span class="badge bg-warning text-dark">{{ r.ma50 or '-' }}</span></td>
+                            <td><span class="badge bg-warning text-dark">{{ r.ma200 or '-' }}</span></td>
+
+                            <td><span class="badge bg-info text-dark">{{ r.gradien or '-' }}</span></td>
+
+                            <td><span class="badge bg-secondary">{{ r.volume or '-' }}</span></td>
+
+                            <!-- RSI -->
+                            <td>
+                                <span class="badge 
+                                    {% if r.rsi == 'overbought' %}bg-danger
+                                    {% elif r.rsi == 'oversold' %}bg-success
+                                    {% else %}bg-secondary
+                                    {% endif %}">
+                                    {{ r.rsi or '-' }}
+                                </span>
+                            </td>
+
+                            <!-- Sentimen -->
+                            <td>
+                                <span class="badge 
+                                    {% if r.sentimen == 'positif' %}bg-success
+                                    {% elif r.sentimen == 'negatif' %}bg-danger
+                                    {% else %}bg-secondary
+                                    {% endif %}">
+                                    {{ r.sentimen or '-' }}
+                                </span>
+                            </td>
+
+                            <!-- Output -->
+                            <td>
+                                <span class="badge 
+                                    {% if r.output == 'Potensial' %}bg-primary
+                                    {% elif r.output == 'Tidak Potensial' %}bg-danger
+                                    {% else %}bg-dark
+                                    {% endif %}">
+                                    {{ r.output }}
+                                </span>
+                            </td>
+
+                            <!-- Horizon -->
+                            <td>
+                                <span class="badge bg-dark">
+                                    {{ r.horizon or '-' }}
+                                </span>
+                            </td>
+
+                            <!-- Aksi -->
+                            <td class="text-center">
+
+                                <a href="{{ url_for('admin_rule.edit', id=r.id_rule) }}"
+                                   class="btn btn-sm btn-warning me-1">
+                                    ✏️
+                                </a>
+
+                                <form action="{{ url_for('admin_rule.delete', id=r.id_rule) }}"
+                                      method="POST"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('Yakin hapus rule ini?');">
+
+                                    <button class="btn btn-sm btn-danger">
+                                        🗑️
+                                    </button>
+                                </form>
+
+                            </td>
+
+                        </tr>
+                    {% endfor %}
+
+                    {% if rules|length == 0 %}
+                        <tr>
+                            <td colspan="15" class="text-center text-muted py-4">
+                                Tidak ada data rule
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- DataTables -->
+<script>
+$(document).ready(function() {
+    $('#ruleTable').DataTable({
+        pageLength: 10,
+        lengthMenu: [5, 10, 25, 50],
+        ordering: true,
+        searching: true,
+        responsive: true,
+        autoWidth: false,
+        language: {
+            search: "🔍 Cari:",
+            lengthMenu: "Tampilkan _MENU_ data",
+            info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+            paginate: {
+                next: "→",
+                previous: "←"
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

@@ -10,6 +10,7 @@ import pandas as pd
 
 app = Flask(__name__)
 
+
 @app.route("/sentiment/run", methods=["POST"])
 def run():
     # ===============================
@@ -31,6 +32,7 @@ def run():
     # 2. ANALISIS BERITA
     # ===============================
     berita_per_saham = {}
+    berita_tanpa_emiten = []
 
     for n in news:
         judul = n.get("judul", "")
@@ -41,12 +43,25 @@ def run():
         sent = classify_sentiment(text)
         tickers = detect_emiten(text)
 
-        # Skip berita tanpa emiten
+        # Jika tidak ada emiten terdeteksi, tetap simpan detail ke DB dengan ticker NULL
         if not tickers:
+            berita_tanpa_emiten.append({
+                "sentimen": sent,
+                "judul": judul,
+                "link": link
+            })
+
+            save_sentiment_detail(
+                ticker=None,
+                judul=judul,
+                link=link,
+                sentiment=sent
+            )
+
             continue
 
         for t in tickers:
-            # In-memory buffer
+            # In-memory buffer untuk emiten yang terdeteksi
             if t not in berita_per_saham:
                 berita_per_saham[t] = []
 
@@ -56,9 +71,7 @@ def run():
                 "link": link
             })
 
-            # ===============================
-            # SIMPAN DETAIL KE DB
-            # ===============================
+            # Simpan detail ke DB
             save_sentiment_detail(
                 ticker=t,
                 judul=judul,
@@ -81,7 +94,7 @@ def run():
     # ===============================
     final = {}
 
-    print("\n📌 HASIL SENTIMEN PER EMITEN (AKUMULASI 7 HARI)")
+    print("\nHASIL SENTIMEN PER EMITEN (AKUMULASI 7 HARI)")
     print("=" * 80)
 
     for t in ALL_TICKERS:
@@ -99,7 +112,7 @@ def run():
             "berita": []
         }
 
-        print(f"\n📈 {t}")
+        print(f"\n{t}")
         print(f"   Sentimen     : {sentiment}")
         print(f"   Total Berita : {total_berita}")
 
@@ -108,21 +121,39 @@ def run():
         else:
             for i, (_, r) in enumerate(berita_t.iterrows(), start=1):
                 print(f"   {i}. {r['judul']}")
-                print(f"      🔗 {r['link']}")
+                print(f"      Link: {r['link']}")
 
                 final[t]["berita"].append({
                     "judul": r["judul"],
                     "link": r["link"]
                 })
 
-        # ===============================
-        # SIMPAN DAILY KE DB
-        # ===============================
         save_sentiment_daily(
             ticker=t,
             sentiment=sentiment,
             total_berita=total_berita
         )
+
+    # Tambahkan info berita umum ke response, tapi tidak disimpan ke daily
+    final["_tanpa_emiten"] = {
+        "total_berita": len(berita_tanpa_emiten),
+        "berita": [
+            {
+                "judul": b["judul"],
+                "link": b["link"],
+                "sentimen": b["sentimen"]
+            }
+            for b in berita_tanpa_emiten
+        ]
+    }
+
+    print("\nBERITA TANPA EMITEN")
+    print(f"   Total Berita : {len(berita_tanpa_emiten)}")
+
+    for i, b in enumerate(berita_tanpa_emiten, start=1):
+        print(f"   {i}. {b['judul']}")
+        print(f"      Link: {b['link']}")
+        print(f"      Sentimen: {b['sentimen']}")
 
     return jsonify(final), 200
 

@@ -3,7 +3,8 @@ from config import Config
 from extension import login_manager
 from models.user import User
 from main.routes import main_bp, user_bp
-
+from main.routes_admin import admin_stock
+from main.rule_routes import admin_rule
 
 def create_app():
     app = Flask(__name__)
@@ -21,6 +22,8 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(user_bp)
+    app.register_blueprint(admin_stock)
+    app.register_blueprint(admin_rule)
 
 
     return app

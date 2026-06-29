@@ -6,309 +6,508 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+        :root {
+            --sidebar-bg: #0f172a;
+            --sidebar-hover: #1e293b;
+            --sidebar-active: #3b82f6;
+            --sidebar-text: #94a3b8;
+            --sidebar-text-hover: #f1f5f9;
+        }
+
         body {
-            background-color: #f8fafc;
-            font-family: 'Segoe UI', sans-serif;
+            background-color: #f1f5f9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
         }
 
         #wrapper {
             display: flex;
+            min-height: 100vh;
         }
 
-        /* Sidebar */
         #sidebar {
-            width: 260px;
+            width: 280px;
             min-height: 100vh;
-            background: #111827;
+            background: var(--sidebar-bg);
             color: white;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
         }
 
         #sidebar.collapsed {
-            width: 80px;
+            width: 90px;
         }
 
-        #sidebar .nav-link {
-            color: #cbd5e1;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            transition: 0.2s;
+        .sidebar-brand {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
 
-        #sidebar .nav-link:hover,
-        #sidebar .nav-link.active {
-            background: #2563eb;
+        .brand-icon {
+            width: 46px;
+            height: 46px;
+            background: #3b82f6;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+        }
+
+        .brand-text {
+            overflow: hidden;
+            white-space: nowrap;
+            transition: opacity 0.3s ease;
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: 700;
             color: white;
+            margin: 0;
+            letter-spacing: -0.5px;
         }
 
-        #sidebar.collapsed .nav-text {
+        .brand-tagline {
+            font-size: 11px;
+            color: var(--sidebar-text);
+            margin-top: 2px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 14px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--sidebar-text);
+            padding: 0 12px;
+            margin-bottom: 12px;
+            margin-top: 8px;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        #sidebar.collapsed .nav-section-title {
+            opacity: 0;
+            height: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .nav-item {
+            margin-bottom: 6px;
+            animation: slideIn 0.3s ease forwards;
+            opacity: 0;
+        }
+
+        .nav-item:nth-child(1) { animation-delay: 0.05s; }
+        .nav-item:nth-child(2) { animation-delay: 0.1s; }
+        .nav-item:nth-child(3) { animation-delay: 0.15s; }
+        .nav-item:nth-child(4) { animation-delay: 0.2s; }
+        .nav-item:nth-child(5) { animation-delay: 0.25s; }
+
+        #sidebar:not(.collapsed) .nav-item {
+            opacity: 1;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 0;
+            background: var(--sidebar-active);
+            border-radius: 0 4px 4px 0;
+            transition: height 0.25s ease;
+        }
+
+        .nav-link:hover {
+            background: var(--sidebar-hover);
+            color: var(--sidebar-text-hover);
+            transform: translateX(4px);
+        }
+
+        .nav-link:hover::before {
+            height: 24px;
+        }
+
+        .nav-link.active {
+            background: rgba(59, 130, 246, 0.18);
+            color: white;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .nav-link.active::before {
+            height: 32px;
+            background: var(--sidebar-active);
+            box-shadow: 0 0 12px var(--sidebar-active);
+        }
+
+        .nav-link i {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .nav-link span {
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.3s ease;
+        }
+
+        #sidebar.collapsed .nav-link span {
+            opacity: 0;
+            width: 0;
+        }
+
+        #sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 14px;
+        }
+
+        #sidebar.collapsed .nav-link::after {
+            content: attr(data-title);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--sidebar-bg);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            margin-left: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+        }
+
+        #sidebar.collapsed .nav-link:hover::after {
+            opacity: 1;
+            visibility: visible;
+            margin-left: 8px;
+        }
+
+        .sidebar-user {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(0, 0, 0, 0.2);
+            z-index: 1200;
+        }
+
+        .sidebar-user .dropdown-menu {
+            z-index: 1300;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--sidebar-hover);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .user-info:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: #059669;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .user-details {
+            overflow: hidden;
+            transition: opacity 0.3s ease;
+        }
+
+        #sidebar.collapsed .user-details {
+            opacity: 0;
+            width: 0;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+            margin: 0;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: var(--sidebar-text);
+            margin: 0;
+        }
+
+        .user-dropdown {
+            margin-left: auto;
+            color: var(--sidebar-text);
+            transition: transform 0.2s ease;
+        }
+
+        #main-wrapper {
+            flex: 1;
+            margin-left: 280px;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #main-wrapper.expanded {
+            margin-left: 90px;
+        }
+
+        .topbar {
+            background: white;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .toggle-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: #f8fafc;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+            transform: scale(1.05);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .profile-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px 8px 8px;
+            background: #f8fafc;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .profile-menu:hover {
+            background: #e2e8f0;
+        }
+
+        .profile-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1e293b;
+        }
+
+        .topbar-mobile-profile {
             display: none;
         }
 
-        /* Main */
-        #content {
-            flex-grow: 1;
-            transition: 0.3s;
+        .main-content {
+            flex: 1;
+            padding: 30px;
         }
 
-        /* Cards */
         .card-stat {
             border: none;
             border-radius: 16px;
             color: white;
         }
 
-        .gradient-blue {
-            background: linear-gradient(135deg, #2563eb, #1e40af);
+        .gradient-blue { background: #1d4ed8; }
+        .gradient-green { background: #059669; }
+        .gradient-orange { background: #d97706; }
+        .gradient-purple { background: #6d28d9; }
+
+        .mobile-bottom-nav {
+            display: none;
         }
 
-        .gradient-green {
-            background: linear-gradient(135deg, #16a34a, #166534);
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
-        .gradient-orange {
-            background: linear-gradient(135deg, #f59e0b, #b45309);
+        @media (max-width: 768px) {
+            #wrapper {
+                display: block;
+            }
+
+            #sidebar {
+                display: none !important;
+            }
+
+            #main-wrapper,
+            #main-wrapper.expanded {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .topbar {
+                padding: 12px 16px;
+            }
+
+            .toggle-btn {
+                display: none;
+            }
+
+            .topbar-mobile-profile {
+                display: flex;
+            }
+
+            .profile-menu {
+                padding: 6px;
+                gap: 8px;
+            }
+
+            .profile-name,
+            .profile-menu .bi-chevron-down {
+                display: none;
+            }
+
+            .profile-avatar {
+                width: 36px;
+                height: 36px;
+            }
+
+            .main-content {
+                padding: 20px 16px 96px;
+            }
+
+            .mobile-bottom-nav {
+                position: fixed;
+                left: 12px;
+                right: 12px;
+                bottom: 12px;
+                z-index: 1100;
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+                padding: 8px;
+                background: rgba(15, 23, 42, 0.96);
+                border-radius: 22px;
+                box-shadow: 0 16px 40px rgba(15, 23, 42, 0.28);
+                backdrop-filter: blur(16px);
+            }
+
+            .mobile-bottom-link {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                min-height: 58px;
+                border-radius: 16px;
+                color: #94a3b8;
+                text-decoration: none;
+                font-size: 11px;
+                font-weight: 600;
+                transition: all 0.2s ease;
+            }
+
+            .mobile-bottom-link i {
+                font-size: 20px;
+                line-height: 1;
+            }
+
+            .mobile-bottom-link.active,
+            .mobile-bottom-link:hover {
+                background: #3b82f6;
+                color: #ffffff;
+            }
         }
-
-        .profile-dropdown {
-            cursor: pointer;
-        }
-
- .ranking-card {
-    transition: all 0.25s ease;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
-.ranking-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-}
-
-.top-ranked {
-    background: linear-gradient(135deg, #f0fff4, #ffffff);
-    border-left: 5px solid #28a745;
-}
-
-.logo-wrapper {
-    width: 50px;
-    height: 50px;
-    background: #f5f7fa;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.logo-img {
-    max-width: 70%;
-    max-height: 70%;
-    object-fit: contain;
-}
-
-.chat-wrapper {
-    max-width: 900px;
-    margin: auto;
-    height: 80vh;
-    display: flex;
-    flex-direction: column;
-    background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.08);
-    overflow: hidden;
-}
-
-.chat-header {
-    padding: 20px;
-    border-bottom: 1px solid #eee;
-    background: linear-gradient(135deg, #f8f9fa, #ffffff);
-}
-
-.chat-body {
-    flex: 1;
-    padding: 25px;
-    overflow-y: auto;
-    background: #f5f7fb;
-}
-
-.chat-message {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
-    max-width: 75%;
-}
-
-.chat-message.user {
-    align-self: flex-end;
-    text-align: right;
-}
-
-.chat-message.bot {
-    align-self: flex-start;
-}
-
-.bubble {
-    padding: 12px 18px;
-    border-radius: 18px;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.chat-message.user .bubble {
-    background: #0d6efd;
-    color: white;
-    border-bottom-right-radius: 5px;
-}
-
-.chat-message.bot .bubble {
-    background: #e9ecef;
-    border-bottom-left-radius: 5px;
-}
-
-.time {
-    font-size: 11px;
-    color: #888;
-    margin-top: 5px;
-}
-
-.chat-footer {
-    display: flex;
-    padding: 15px;
-    border-top: 1px solid #eee;
-    background: white;
-}
-
-.chat-footer input {
-    flex: 1;
-    border: 1px solid #ddd;
-    border-radius: 30px;
-    padding: 10px 15px;
-    outline: none;
-}
-
-.chat-footer button {
-    margin-left: 10px;
-    border: none;
-    background: #0d6efd;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 30px;
-    transition: 0.2s ease;
-}
-
-.chat-footer button:hover {
-    background: #0b5ed7;
-}
-
-.typing {
-    font-style: italic;
-    opacity: 0.7;
-}
-
-.chat-container {
-    display: flex;
-    height: 80vh;
-    background: white;
-    border-radius: 20px;
-    overflow: hidden;
-}
-
-.chat-sidebar {
-    width: 250px;
-    background: #f8f9fa;
-    padding: 15px;
-    border-right: 1px solid #ddd;
-}
-
-.new-chat-btn {
-    width: 100%;
-    margin-bottom: 15px;
-    padding: 10px;
-    border: none;
-    background: #0d6efd;
-    color: white;
-    border-radius: 8px;
-}
-
-.conversation-item {
-    padding: 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-bottom: 5px;
-}
-
-.conversation-item:hover {
-    background: #e9ecef;
-}
-
-.conversation-item.active {
-    background: #dee2ff;
-}
-
-.chat-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.chat-body {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    background: #f5f7fb;
-}
-
-.bubble h1,
-.bubble h2,
-.bubble h3 {
-    font-size: 15px;
-    margin-top: 10px;
-}
-
-.bubble ul {
-    padding-left: 18px;
-}
-
-.bubble strong {
-    font-weight: 600;
-}
-
-.conversation-item {
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.conversation-item:hover {
-    background: #f5f7fb;
-}
-
-.conversation-item .delete-btn {
-    display: none;
-    cursor: pointer;
-}
-
-.conversation-item:hover .delete-btn {
-    display: inline;
-    color: #dc3545;
-}
-
-.insight-content {
-    line-height: 1.6;
-    font-size: 0.95rem;
-}
-.insight-content p {
-    margin-bottom: 0.7rem;
-}
-
     </style>
 </head>
 
@@ -317,61 +516,157 @@
 <div id="wrapper">
 
     <!-- Sidebar -->
-    <div id="sidebar" class="p-3">
+    <nav id="sidebar" class="d-flex flex-column">
 
-        <h5 class="fw-bold mb-4 nav-text">FuzzyInvest</h5>
-
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link active" href="/user">
-                    <span class="nav-text">Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('user.ranking') }}">
-                    <span class="nav-text">Ranking Saham</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('user.konsultasi') }}">
-                    <span class="nav-text">Konsultasi AI</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/berita">
-                    <span class="nav-text">Berita</span>
-                </a>
-            </li>
-        </ul>
-
-    </div>
-
-    <!-- Main Content -->
-    <div id="content">
-
-        <!-- Topbar -->
-        <div class="d-flex justify-content-between align-items-center bg-white p-3 shadow-sm">
-
-            <button class="btn btn-outline-secondary btn-sm"
-                    onclick="toggleSidebar()">☰</button>
-
-            <!-- Profile Dropdown -->
-            <div class="dropdown">
-                <div class="profile-dropdown dropdown-toggle"
-                     data-bs-toggle="dropdown">
-                    👤 {{ current_user.username }}
-                </div>
-
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="#">Profile</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="/logout">Logout</a></li>
-                </ul>
+        <!-- Brand -->
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="bi bi-graph-up-arrow"></i>
             </div>
-
+            <div class="brand-text">
+                <h5 class="brand-name">FuzzyInvest</h5>
+                <div class="brand-tagline">Smart Trading</div>
+            </div>
         </div>
 
-        <div class="p-4">
+        <!-- Navigation -->
+        <div class="sidebar-nav flex-grow-1">
+            <div class="nav-section-title">Menu Utama</div>
+
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/user" data-title="Dashboard">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('user.ranking') }}" data-title="Ranking Saham">
+                        <i class="bi bi-trophy-fill"></i>
+                        <span>Ranking Saham</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('user.konsultasi') }}" data-title="Konsultasi AI">
+                        <i class="bi bi-chat-dots-fill"></i>
+                        <span>Konsultasi AI</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('user.berita') }}" data-title="Berita">
+                        <i class="bi bi-newspaper"></i>
+                        <span>Berita</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- User Profile Sidebar -->
+        <div class="sidebar-user">
+            <div class="dropdown">
+                <div class="user-info"
+                     data-bs-toggle="dropdown"
+                     aria-expanded="false"
+                     role="button">
+                    <div class="user-avatar">
+                        {{ current_user.username[0]|upper }}
+                    </div>
+
+                    <div class="user-details">
+                        <p class="user-name">{{ current_user.username }}</p>
+                        <p class="user-role">Investor</p>
+                    </div>
+
+                    <div class="user-dropdown">
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+
+                <ul class="dropdown-menu dropdown-menu-dark"
+                    style="width: 200px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="bi bi-person-circle me-2"></i>Profile
+                        </a>
+                    </li>
+
+                    <li><hr class="dropdown-divider"></li>
+
+                    <li>
+                        <a class="dropdown-item text-danger" href="/logout">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a class="mobile-bottom-link" href="/user" data-path="/user">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Home</span>
+        </a>
+
+        <a class="mobile-bottom-link" href="{{ url_for('user.ranking') }}" data-path="{{ url_for('user.ranking') }}">
+            <i class="bi bi-trophy-fill"></i>
+            <span>Ranking</span>
+        </a>
+
+        <a class="mobile-bottom-link" href="{{ url_for('user.konsultasi') }}" data-path="{{ url_for('user.konsultasi') }}">
+            <i class="bi bi-chat-dots-fill"></i>
+            <span>AI</span>
+        </a>
+
+        <a class="mobile-bottom-link" href="{{ url_for('user.berita') }}" data-path="{{ url_for('user.berita') }}">
+            <i class="bi bi-newspaper"></i>
+            <span>Berita</span>
+        </a>
+    </nav>
+
+    <!-- Main Content -->
+    <div id="main-wrapper">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div class="topbar-right">
+                <div class="profile-menu dropdown topbar-mobile-profile">
+                    <div class="profile-avatar">
+                        {{ current_user.username[0]|upper }}
+                    </div>
+
+                    <span class="profile-name">{{ current_user.username }}</span>
+                    <i class="bi bi-chevron-down" style="font-size: 12px; color: #64748b;"></i>
+
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-person-circle me-2"></i>Profile
+                            </a>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <a class="dropdown-item text-danger" href="/logout">
+                                <i class="bi bi-box-arrow-right me-2"></i>Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="main-content">
             {% block content %}{% endblock %}
         </div>
 
@@ -381,8 +676,27 @@
 
 <script>
 function toggleSidebar() {
-    document.getElementById("sidebar").classList.toggle("collapsed");
+    const sidebar = document.getElementById('sidebar');
+    const mainWrapper = document.getElementById('main-wrapper');
+
+    sidebar.classList.toggle('collapsed');
+    mainWrapper.classList.toggle('expanded');
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const currentPath = window.location.pathname;
+
+    document.querySelectorAll('.nav-link, .mobile-bottom-link').forEach(link => {
+        link.classList.remove('active');
+
+        const href = link.getAttribute('href');
+        const dataPath = link.getAttribute('data-path');
+
+        if (href === currentPath || dataPath === currentPath) {
+            link.classList.add('active');
+        }
+    });
+});
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

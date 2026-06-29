@@ -9,6 +9,7 @@ from db import (
     save_fuzzy_output
 )
 
+
 def run_fuzzy():
     # =========================
     # AMBIL DATA
@@ -37,14 +38,13 @@ def run_fuzzy():
     # LOOP PER SAHAM
     # =========================
     for _, r in df_stock.iterrows():
-        # 🔒 copy agar aman
         row = r.copy()
 
         ticker = row["ticker"]
         stockdata_id = row["stockdata_id"]
 
         # =====================
-        # SENTIMEN → NUMERIK
+        # SENTIMEN -> NUMERIK
         # =====================
         row["sent_v"] = get_sentiment_value(ticker)
 
@@ -52,6 +52,9 @@ def run_fuzzy():
         # FUZZY EVALUATION
         # =====================
         res = engine.evaluate(row)
+
+        # Debug sementara
+        print("DEBUG FUZZY:", ticker, res["rule_id"], res["rule_condition"], res["firing_strength"])
 
         # =====================
         # SIMPAN MEMBERSHIP
@@ -68,14 +71,20 @@ def run_fuzzy():
             stockdata_id=stockdata_id,
             score=res["score"],
             kategori=res["label"],
-            horizon=res["horizon"]
+            horizon=res["horizon"],
+            rule_id=res["rule_id"],
+            rule_condition=res["rule_condition"],
+            firing_strength=res["firing_strength"]
         )
 
         results.append({
             "ticker": ticker,
             "score": res["score"],
             "label": res["label"],
-            "horizon": res["horizon"]
+            "horizon": res["horizon"],
+            "rule_id": res["rule_id"],
+            "rule_condition": res["rule_condition"],
+            "firing_strength": res["firing_strength"]
         })
 
     return {

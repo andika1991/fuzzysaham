@@ -20,9 +20,8 @@ DB_CONFIG = {
 def get_connection():
     return mysql.connector.connect(**DB_CONFIG)
 
-# ===============================
-# SIMPAN DETAIL BERITA
-# ===============================
+
+
 def save_sentiment_detail(ticker, judul, link, sentiment):
     conn = None
     cursor = None

@@ -1,75 +1,715 @@
 {% extends 'user/layout/base.html' %}
+
+{% block title %}Detail {{ detail.ticker }} - FuzzyInvest{% endblock %}
+
 {% block content %}
 
+{% set fuzzy_score = detail.fuzzy_score or 0 %}
+{% set m = membership[0] if membership else none %}
+
+<style>
+    .detail-header {
+        position: relative;
+        overflow: hidden;
+        padding: 26px;
+        margin-bottom: 24px;
+        color: #ffffff;
+        background: #1d4ed8;
+        border-radius: 20px;
+    }
+
+    .detail-header::after {
+        content: "";
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 180px;
+        height: 180px;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .stock-avatar {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        overflow: hidden;
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 14px;
+        font-size: 22px;
+        font-weight: 800;
+    }
+
+    .stock-avatar-img {
+        width: 78%;
+        height: 78%;
+        object-fit: contain;
+    }
+
+    .soft-card {
+        border: 1px solid #eef2f7;
+        border-radius: 16px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+    }
+
+    .chart-card {
+        overflow: hidden;
+    }
+
+    #tradingview_chart {
+        min-height: 500px;
+    }
+
+    /* ================= SCORE ================= */
+    .score-card {
+        background: #ffffff;
+    }
+
+    .score-circle {
+        position: relative;
+        width: 132px;
+        height: 132px;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 18px;
+        background:
+            conic-gradient(
+                #22c55e calc(var(--score) * 1%),
+                #e5e7eb 0
+            );
+        border-radius: 50%;
+    }
+
+    .score-circle::before {
+        content: "";
+        position: absolute;
+        width: 102px;
+        height: 102px;
+        background: #ffffff;
+        border-radius: 50%;
+    }
+
+    .score-circle span {
+        position: relative;
+        z-index: 1;
+        color: #0f172a;
+        font-size: 24px;
+        font-weight: 800;
+    }
+
+    /* ================= INSIGHT ================= */
+    .insight-card {
+        padding: 0 !important;
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #2563eb;
+    }
+
+    .insight-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 22px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .insight-icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        color: #2563eb;
+        background: #dbeafe;
+        border-radius: 10px;
+        font-size: 19px;
+    }
+
+    .insight-title {
+        margin: 0 0 3px;
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .insight-subtitle {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .insight-content {
+        padding: 22px;
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.8;
+        overflow-wrap: anywhere;
+    }
+
+    .insight-content > *:first-child {
+        margin-top: 0;
+    }
+
+    .insight-content > *:last-child {
+        margin-bottom: 0;
+    }
+
+    .insight-content h1 {
+        margin: 0 0 18px;
+        color: #0f172a;
+        font-size: 20px;
+        line-height: 1.4;
+        font-weight: 750;
+    }
+
+    .insight-content h2,
+    .insight-content h3 {
+        margin: 24px 0 10px;
+        padding-bottom: 8px;
+        color: #1e293b;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 16px;
+        line-height: 1.5;
+        font-weight: 700;
+    }
+
+    .insight-content p {
+        margin: 0 0 14px;
+    }
+
+    .insight-content strong {
+        color: #1e293b;
+        font-weight: 700;
+    }
+
+    .insight-content ol,
+    .insight-content ul {
+        margin: 10px 0 18px;
+        padding-left: 22px;
+    }
+
+    .insight-content li {
+        margin-bottom: 9px;
+        padding-left: 3px;
+    }
+
+    .insight-content li::marker {
+        color: #2563eb;
+        font-weight: 700;
+    }
+
+    .insight-content hr {
+        margin: 22px 0;
+        border: 0;
+        border-top: 1px solid #e2e8f0;
+        opacity: 1;
+    }
+
+    .insight-content blockquote {
+        margin: 18px 0;
+        padding: 12px 14px;
+        color: #475569;
+        background: #f8fafc;
+        border-left: 3px solid #2563eb;
+    }
+
+    .insight-content table {
+        width: 100%;
+        margin: 16px 0;
+        border-collapse: collapse;
+    }
+
+    .insight-content th,
+    .insight-content td {
+        padding: 9px 10px;
+        border: 1px solid #e2e8f0;
+        text-align: left;
+    }
+
+    .insight-content th {
+        color: #1e293b;
+        background: #f8fafc;
+    }
+
+    .insight-error {
+        margin: 0;
+        padding: 12px 14px;
+        color: #991b1b;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+    }
+
+    /* ================= INDICATORS ================= */
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .metric-item {
+        min-width: 0;
+        min-height: 112px;
+        padding: 16px;
+        background: #f8fafc;
+        border: 1px solid #eef2f7;
+        border-radius: 14px;
+    }
+
+    .metric-icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 12px;
+        border-radius: 10px;
+        font-size: 20px;
+    }
+
+    .metric-blue .metric-icon {
+        color: #2563eb;
+        background: #dbeafe;
+    }
+
+    .metric-green .metric-icon {
+        color: #16a34a;
+        background: #dcfce7;
+    }
+
+    .metric-orange .metric-icon {
+        color: #ea580c;
+        background: #ffedd5;
+    }
+
+    .metric-purple .metric-icon {
+        color: #7c3aed;
+        background: #ede9fe;
+    }
+
+    .metric-pink .metric-icon {
+        color: #db2777;
+        background: #fce7f3;
+    }
+
+    .metric-dark .metric-icon {
+        color: #334155;
+        background: #e2e8f0;
+    }
+
+    .metric-red .metric-icon {
+        color: #dc2626;
+        background: #fee2e2;
+    }
+
+    .metric-teal .metric-icon {
+        color: #0f766e;
+        background: #ccfbf1;
+    }
+
+    .metric-indigo .metric-icon {
+        color: #4f46e5;
+        background: #e0e7ff;
+    }
+
+    .metric-cyan .metric-icon {
+        color: #0891b2;
+        background: #cffafe;
+    }
+
+    .metric-rose .metric-icon {
+        color: #e11d48;
+        background: #ffe4e6;
+    }
+
+    .metric-slate .metric-icon {
+        color: #475569;
+        background: #e2e8f0;
+    }
+
+    .metric-label {
+        margin-bottom: 4px;
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .metric-value {
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    /* ================= FUZZY ================= */
+    .fuzzy-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .fuzzy-item {
+        min-width: 0;
+        padding: 16px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+    }
+
+    .fuzzy-item i {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 20px;
+    }
+
+    .fuzzy-item small {
+        display: block;
+        margin-bottom: 5px;
+        color: #64748b;
+    }
+
+    .fuzzy-item div {
+        color: #0f172a;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    /* ================= MOBILE TABLE ================= */
+    .mobile-data-table {
+        display: none;
+    }
+
+    /* ================= NEWS ================= */
+    .news-item {
+        padding: 16px;
+        margin-bottom: 12px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .news-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    @media (max-width: 991px) {
+        .metric-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .fuzzy-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        #tradingview_chart {
+            min-height: 380px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .desktop-indicator-card,
+        .desktop-fuzzy-card {
+            display: none !important;
+        }
+
+        .mobile-data-table {
+            display: block !important;
+            width: 100%;
+            margin-top: 12px;
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        .mobile-data-table table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .mobile-data-table th {
+            padding: 9px 11px;
+            color: #0f172a;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .mobile-data-table td {
+            padding: 8px 11px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .mobile-data-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .mobile-data-table td:first-child {
+            width: 48%;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .mobile-data-table td:last-child {
+            color: #0f172a;
+            text-align: right;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .detail-header {
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 14px;
+        }
+
+        .detail-header::after {
+            top: -42px;
+            right: -42px;
+            width: 110px;
+            height: 110px;
+        }
+
+        .detail-header h3 {
+            font-size: 1.05rem;
+            line-height: 1.3;
+        }
+
+        .detail-header h3 span {
+            display: block;
+            margin-top: 3px;
+            font-size: 0.78rem;
+        }
+
+        .stock-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .soft-card {
+            border-radius: 12px !important;
+        }
+
+        .chart-card {
+            padding: 5px !important;
+            margin-bottom: 12px !important;
+        }
+
+        #tradingview_chart {
+            min-height: 300px;
+        }
+
+        .row.g-4 {
+            --bs-gutter-y: 12px;
+        }
+
+        .score-card {
+            padding: 15px !important;
+        }
+
+        .score-circle {
+            width: 96px;
+            height: 96px;
+            margin-bottom: 10px;
+        }
+
+        .score-circle::before {
+            width: 72px;
+            height: 72px;
+        }
+
+        .score-circle span {
+            font-size: 17px;
+        }
+
+        .score-card h2 {
+            font-size: 1.2rem;
+        }
+
+        .score-card .badge {
+            padding: 5px 7px !important;
+            font-size: 10px;
+        }
+
+        .insight-card {
+            border-left-width: 3px;
+        }
+
+        .insight-header {
+            gap: 10px;
+            padding: 13px 14px;
+        }
+
+        .insight-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .insight-title {
+            font-size: 14px;
+        }
+
+        .insight-subtitle {
+            font-size: 10px;
+        }
+
+        .insight-content {
+            padding: 14px;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .insight-content h1 {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .insight-content h2,
+        .insight-content h3 {
+            margin: 18px 0 8px;
+            padding-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .insight-content p {
+            margin-bottom: 10px;
+        }
+
+        .insight-content ol,
+        .insight-content ul {
+            margin-bottom: 12px;
+            padding-left: 18px;
+        }
+
+        .insight-content table {
+            display: block;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .news-card {
+            padding: 14px !important;
+        }
+
+        .news-item {
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+        }
+
+        .news-item > .d-flex {
+            flex-direction: column;
+            gap: 8px !important;
+        }
+
+        .news-item a {
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .news-item .badge {
+            align-self: flex-start;
+            padding: 5px 7px;
+            font-size: 10px;
+        }
+    }
+</style>
+
 <!-- ================= HEADER ================= -->
-<div class="mb-3">
-    <h3 class="fw-bold">
-        {{ detail.ticker }} 
-        <small class="text-muted">
-            - {{ detail.nama_perusahaan }}
-        </small>
-    </h3>
-    <small class="text-muted">
-        Update terakhir: {{ detail.created_at.strftime('%d %B %Y') }}
-    </small>
+<div class="detail-header">
+    <div class="d-flex align-items-center gap-3 position-relative">
+        <div class="stock-avatar">
+            <img
+                src="https://assets.stockbit.com/logos/companies/{{ detail.ticker }}.png"
+                alt="{{ detail.ticker }}"
+                class="stock-avatar-img"
+                onerror="handleLogoError(this, '{{ detail.ticker[:1] }}')">
+        </div>
+
+        <div class="min-width-0">
+            <h3 class="fw-bold mb-1">
+                {{ detail.ticker }}
+                <span class="fw-normal opacity-75">
+                    - {{ detail.nama_perusahaan }}
+                </span>
+            </h3>
+
+            <div class="opacity-75" style="font-size: 14px;">
+                <i class="bi bi-calendar3 me-1"></i>
+                Update terakhir:
+                {{ detail.created_at.strftime('%d %B %Y') if detail.created_at else '-' }}
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- ================= TRADING VIEW CHART ================= -->
-<div class="card shadow-sm border-0 rounded-4 p-2 mb-4">
+<!-- ================= CHART ================= -->
+<div class="card soft-card chart-card p-2 mb-4">
     <div id="tradingview_chart"></div>
 </div>
 
 <!-- ================= INSIGHT ================= -->
 {% if detail.insight %}
-<div class="card shadow-sm border-0 rounded-4 p-4 mb-4 bg-light">
-    <h6 class="mb-3">📊 Insight Analisis</h6>
+<div class="card soft-card insight-card mb-4">
+    <div class="insight-header">
+        <div class="insight-icon">
+            <i class="bi bi-stars"></i>
+        </div>
 
-    <div class="insight-content">
-        {{ detail.insight | safe }}
+        <div>
+            <h6 class="insight-title">Insight Analisis</h6>
+            <div class="insight-subtitle">
+                Penjelasan berdasarkan hasil analisis Fuzzy Mamdani
+            </div>
+        </div>
     </div>
+
+    <div
+        id="insightContent"
+        class="insight-content"
+        aria-live="polite">
+    </div>
+
+    <script id="insightSource" type="application/json">
+        {{ detail.insight | tojson }}
+    </script>
 </div>
 {% endif %}
 
-<!-- ================= PRICE & INFO ================= -->
+<!-- ================= MAIN INFO ================= -->
 <div class="row g-4">
-
-    <!-- LEFT PANEL -->
-    <div class="col-md-4">
-        <div class="card shadow-sm border-0 rounded-4 p-4">
-
-            <h6 class="text-muted">Harga Terakhir</h6>
-            <h2 class="fw-bold mb-3">
-                Rp {{ "{:,.0f}".format(detail.close_price) }}
-            </h2>
-
-            <hr>
-
-            <h6 class="text-muted">Fuzzy Score</h6>
-
-            <div class="progress mt-2" style="height:10px;">
-                <div class="progress-bar 
-                    {% if detail.fuzzy_score >= 0.8 %}
-                        bg-success
-                    {% elif detail.fuzzy_score >= 0.6 %}
-                        bg-warning
-                    {% else %}
-                        bg-danger
-                    {% endif %}
-                "
-                style="width: {{ detail.fuzzy_score * 100 }}%;">
-                </div>
+    <div class="col-lg-4">
+        <div class="card soft-card score-card p-4 h-100 text-center">
+            <div
+                class="score-circle"
+                style="--score: {{ fuzzy_score * 100 }};">
+                <span>{{ "%.1f"|format(fuzzy_score * 100) }}%</span>
             </div>
 
-            <div class="mt-2 fw-semibold">
-                {{ "%.4f"|format(detail.fuzzy_score) }}
-            </div>
+            <h6 class="text-muted mb-2">Fuzzy Score</h6>
 
-            <div class="mt-3">
-                <span class="badge bg-info px-3 py-2 me-2">
-                    {{ detail.horizon }}
+            <div class="mb-3">
+                <span class="badge bg-info px-3 py-2 me-1">
+                    {{ detail.horizon or '-' }}
                 </span>
 
-                <span class="badge 
+                <span class="badge
                     {% if detail.kategori == 'Potensial' %}
                         bg-success
                     {% elif detail.kategori == 'Netral' %}
@@ -77,189 +717,496 @@
                     {% else %}
                         bg-secondary
                     {% endif %}
-                    px-3 py-2
-                ">
-                    {{ detail.kategori }}
+                    px-3 py-2">
+                    {{ detail.kategori or '-' }}
                 </span>
             </div>
 
+            <hr>
+
+            <div class="text-start">
+                <small class="text-muted">Harga Terakhir</small>
+                <h2 class="fw-bold mb-0">
+                    Rp {{ "{:,.0f}".format(detail.close_price or 0) }}
+                </h2>
+            </div>
         </div>
     </div>
 
-    <!-- RIGHT PANEL -->
-    <div class="col-md-8">
-        <div class="card shadow-sm border-0 rounded-4 p-4">
+    <!-- DESKTOP INDICATORS -->
+    <div class="col-lg-8 desktop-indicator-card">
+        <div class="card soft-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">
+                    Fundamental, Teknikal & Sentimen
+                </h6>
 
-            <h6 class="mb-3">Fundamental & Teknikal</h6>
-
-            <div class="row g-3">
-
-                <div class="col-md-4">
-                    <small class="text-muted">EPS</small>
-                    <div class="fw-bold">{{ detail.eps }}</div>
-                </div>
-
-                <div class="col-md-4">
-                    <small class="text-muted">PER</small>
-                    <div class="fw-bold">{{ detail.per }}</div>
-                </div>
-
-                <div class="col-md-4">
-                    <small class="text-muted">ROE</small>
-                    <div class="fw-bold">{{ detail.roe }}</div>
-                </div>
-
-                <div class="col-md-4">
-                    <small class="text-muted">MA50</small>
-                    <div class="fw-bold">{{ detail.ma50 }}</div>
-                </div>
-
-                <div class="col-md-4">
-                    <small class="text-muted">MA200</small>
-                    <div class="fw-bold">{{ detail.ma200 }}</div>
-                </div>
-
-                <div class="col-md-4">
-                    <small class="text-muted">RSI</small>
-                    <div class="fw-bold">{{ detail.rsi }}</div>
-                </div>
-
+                <span class="badge bg-light text-dark">
+                    Indikator Utama
+                </span>
             </div>
 
-        </div>
-    </div>
-
-</div>
-
-<!-- ================= FUZZY MEMBERSHIP ================= -->
-<!-- ================= FUZZY ANALYSIS ================= -->
-<div class="card shadow-sm border-0 rounded-4 p-4 mt-4">
-    <h6 class="mb-4">Analisis Fuzzy Detail</h6>
-
-    <div class="row g-3">
-
-        <div class="col-md-3">
-            <small class="text-muted">EPS</small>
-            <div class="fw-semibold">{{ membership[0].eps_level }}</div>
-        </div>
-
-        <div class="col-md-3">
-            <small class="text-muted">PER</small>
-            <div class="fw-semibold">{{ membership[0].per_level }}</div>
-        </div>
-
-        <div class="col-md-3">
-            <small class="text-muted">ROE</small>
-            <div class="fw-semibold">{{ membership[0].roe_level }}</div>
-        </div>
-
-        <div class="col-md-3">
-            <small class="text-muted">DER</small>
-            <div class="fw-semibold">{{ membership[0].der_level }}</div>
-        </div>
-
-        <div class="col-md-3">
-            <small class="text-muted">FCF</small>
-            <div class="fw-semibold">{{ membership[0].fcf_level }}</div>
-        </div>
-
-        <div class="col-md-3">
-            <small class="text-muted">Trend MA50</small>
-            <div class="fw-semibold">{{ membership[0].trend_ma50 }}</div>
-        </div>
-
-        <div class="col-md-3">
-            <small class="text-muted">Trend MA200</small>
-            <div class="fw-semibold">{{ membership[0].trend_ma200 }}</div>
-        </div>
-
-        <div class="col-md-3">
-            <small class="text-muted">Gradient</small>
-            <div class="fw-semibold">{{ membership[0].gradient_level }}</div>
-        </div>
-
-        <div class="col-md-3">
-            <small class="text-muted">RSI</small>
-            <div class="fw-semibold">{{ membership[0].rsi_level }}</div>
-        </div>
-
-        <div class="col-md-3">
-            <small class="text-muted">Volume</small>
-            <div class="fw-semibold">{{ membership[0].volume_level }}</div>
-        </div>
-
-        <div class="col-md-3">
-            <small class="text-muted">Sentimen</small>
-            <div class="fw-semibold">{{ membership[0].sentimen_level }}</div>
-        </div>
-
-    </div>
-</div>
-
-<!-- ================= BERITA TERKAIT ================= -->
-<div class="card shadow-sm border-0 rounded-4 p-4 mt-4">
-    <h6 class="mb-4">Berita Emiten (7 Hari Terakhir)</h6>
-
-    {% if news|length == 0 %}
-        <div class="text-muted">Tidak ada berita terbaru.</div>
-    {% endif %}
-
-    {% for n in news %}
-        <div class="mb-3 pb-3 border-bottom">
-
-            <div class="d-flex justify-content-between align-items-center">
-
-                <div>
-                    <a href="{{ n.link }}" target="_blank" 
-                       class="fw-semibold text-decoration-none text-dark">
-                        {{ n.judul }}
-                    </a>
-
-                    <div class="text-muted small">
-                        {{ n.date }}
+            <div class="metric-grid">
+                <div class="metric-item metric-blue">
+                    <div class="metric-icon">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div class="metric-label">EPS</div>
+                    <div class="metric-value">
+                        {{ detail.eps if detail.eps is not none else '-' }}
                     </div>
                 </div>
 
-                <div>
-                    {% if n.sentiment == 'positif' %}
-                        <span class="badge bg-success">Positif</span>
-                    {% elif n.sentiment == 'negatif' %}
-                        <span class="badge bg-danger">Negatif</span>
-                    {% else %}
-                        <span class="badge bg-secondary">Netral</span>
-                    {% endif %}
+                <div class="metric-item metric-orange">
+                    <div class="metric-icon">
+                        <i class="bi bi-percent"></i>
+                    </div>
+                    <div class="metric-label">PER</div>
+                    <div class="metric-value">
+                        {{ detail.per if detail.per is not none else '-' }}
+                    </div>
                 </div>
 
+                <div class="metric-item metric-green">
+                    <div class="metric-icon">
+                        <i class="bi bi-arrow-up-right-circle"></i>
+                    </div>
+                    <div class="metric-label">ROE</div>
+                    <div class="metric-value">
+                        {{ detail.roe if detail.roe is not none else '-' }}
+                    </div>
+                </div>
+
+                <div class="metric-item metric-red">
+                    <div class="metric-icon">
+                        <i class="bi bi-bank"></i>
+                    </div>
+                    <div class="metric-label">DER</div>
+                    <div class="metric-value">
+                        {{ detail.der if detail.der is defined and detail.der is not none else '-' }}
+                    </div>
+                </div>
+
+                <div class="metric-item metric-teal">
+                    <div class="metric-icon">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div class="metric-label">FCF</div>
+                    <div class="metric-value">
+                        {{ detail.fcf if detail.fcf is defined and detail.fcf is not none else '-' }}
+                    </div>
+                </div>
+
+                <div class="metric-item metric-purple">
+                    <div class="metric-icon">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                    <div class="metric-label">MA50</div>
+                    <div class="metric-value">
+                        {{ detail.ma50 if detail.ma50 is not none else '-' }}
+                    </div>
+                </div>
+
+                <div class="metric-item metric-pink">
+                    <div class="metric-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div class="metric-label">MA200</div>
+                    <div class="metric-value">
+                        {{ detail.ma200 if detail.ma200 is not none else '-' }}
+                    </div>
+                </div>
+
+                <div class="metric-item metric-indigo">
+                    <div class="metric-icon">
+                        <i class="bi bi-sliders"></i>
+                    </div>
+                    <div class="metric-label">Gradient</div>
+                    <div class="metric-value">
+                        {{ m.gradient_level if m and m.gradient_level is not none else '-' }}
+                    </div>
+                </div>
+
+                <div class="metric-item metric-dark">
+                    <div class="metric-icon">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <div class="metric-label">RSI</div>
+                    <div class="metric-value">
+                        {{ detail.rsi if detail.rsi is not none else '-' }}
+                    </div>
+                </div>
+
+                <div class="metric-item metric-cyan">
+                    <div class="metric-icon">
+                        <i class="bi bi-soundwave"></i>
+                    </div>
+                    <div class="metric-label">Volume</div>
+                    <div class="metric-value">
+                        {{ detail.volume if detail.volume is defined and detail.volume is not none else '-' }}
+                    </div>
+                </div>
+
+                <div class="metric-item metric-rose">
+                    <div class="metric-icon">
+                        <i class="bi bi-chat-square-heart"></i>
+                    </div>
+                    <div class="metric-label">Sentimen</div>
+                    <div class="metric-value">
+                        {{ m.sentimen_level if m and m.sentimen_level is not none else '-' }}
+                    </div>
+                </div>
+
+                <div class="metric-item metric-slate">
+                    <div class="metric-icon">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                    <div class="metric-label">Harga Terakhir</div>
+                    <div class="metric-value">
+                        Rp {{ "{:,.0f}".format(detail.close_price or 0) }}
+                    </div>
+                </div>
             </div>
-
         </div>
-    {% endfor %}
+    </div>
 
+    <!-- MOBILE INDICATORS -->
+    <div class="col-12 mobile-data-table">
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Indikator Utama</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>EPS</td>
+                    <td>{{ detail.eps if detail.eps is not none else '-' }}</td>
+                </tr>
+                <tr>
+                    <td>PER</td>
+                    <td>{{ detail.per if detail.per is not none else '-' }}</td>
+                </tr>
+                <tr>
+                    <td>ROE</td>
+                    <td>{{ detail.roe if detail.roe is not none else '-' }}</td>
+                </tr>
+                <tr>
+                    <td>DER</td>
+                    <td>{{ detail.der if detail.der is defined and detail.der is not none else '-' }}</td>
+                </tr>
+                <tr>
+                    <td>FCF</td>
+                    <td>{{ detail.fcf if detail.fcf is defined and detail.fcf is not none else '-' }}</td>
+                </tr>
+                <tr>
+                    <td>MA50</td>
+                    <td>{{ detail.ma50 if detail.ma50 is not none else '-' }}</td>
+                </tr>
+                <tr>
+                    <td>MA200</td>
+                    <td>{{ detail.ma200 if detail.ma200 is not none else '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Gradient</td>
+                    <td>{{ m.gradient_level if m and m.gradient_level is not none else '-' }}</td>
+                </tr>
+                <tr>
+                    <td>RSI</td>
+                    <td>{{ detail.rsi if detail.rsi is not none else '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Volume</td>
+                    <td>{{ detail.volume if detail.volume is defined and detail.volume is not none else '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Sentimen</td>
+                    <td>{{ m.sentimen_level if m and m.sentimen_level is not none else '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Harga Terakhir</td>
+                    <td>Rp {{ "{:,.0f}".format(detail.close_price or 0) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!-- ================= TRADINGVIEW SCRIPT ================= -->
+<!-- ================= DESKTOP FUZZY ================= -->
+<div class="card soft-card p-4 mt-4 desktop-fuzzy-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h6 class="fw-bold mb-0">Analisis Fuzzy Detail</h6>
+        <span class="badge bg-primary bg-opacity-10 text-primary">
+            Membership
+        </span>
+    </div>
+
+    {% if m %}
+    <div class="fuzzy-grid">
+        <div class="fuzzy-item">
+            <i class="bi bi-cash text-primary"></i>
+            <small>EPS</small>
+            <div>{{ m.eps_level or '-' }}</div>
+        </div>
+
+        <div class="fuzzy-item">
+            <i class="bi bi-percent text-warning"></i>
+            <small>PER</small>
+            <div>{{ m.per_level or '-' }}</div>
+        </div>
+
+        <div class="fuzzy-item">
+            <i class="bi bi-arrow-up-circle text-success"></i>
+            <small>ROE</small>
+            <div>{{ m.roe_level or '-' }}</div>
+        </div>
+
+        <div class="fuzzy-item">
+            <i class="bi bi-bank text-danger"></i>
+            <small>DER</small>
+            <div>{{ m.der_level or '-' }}</div>
+        </div>
+
+        <div class="fuzzy-item">
+            <i class="bi bi-wallet2 text-success"></i>
+            <small>FCF</small>
+            <div>{{ m.fcf_level or '-' }}</div>
+        </div>
+
+        <div class="fuzzy-item">
+            <i class="bi bi-graph-up-arrow text-primary"></i>
+            <small>Trend MA50</small>
+            <div>{{ m.trend_ma50 or '-' }}</div>
+        </div>
+
+        <div class="fuzzy-item">
+            <i class="bi bi-bar-chart-line text-info"></i>
+            <small>Trend MA200</small>
+            <div>{{ m.trend_ma200 or '-' }}</div>
+        </div>
+
+        <div class="fuzzy-item">
+            <i class="bi bi-sliders text-secondary"></i>
+            <small>Gradient</small>
+            <div>{{ m.gradient_level or '-' }}</div>
+        </div>
+
+        <div class="fuzzy-item">
+            <i class="bi bi-speedometer text-primary"></i>
+            <small>RSI</small>
+            <div>{{ m.rsi_level or '-' }}</div>
+        </div>
+
+        <div class="fuzzy-item">
+            <i class="bi bi-soundwave text-primary"></i>
+            <small>Volume</small>
+            <div>{{ m.volume_level or '-' }}</div>
+        </div>
+
+        <div class="fuzzy-item">
+            <i class="bi bi-chat-square-heart text-danger"></i>
+            <small>Sentimen</small>
+            <div>{{ m.sentimen_level or '-' }}</div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center text-muted py-4">
+        Data membership fuzzy belum tersedia.
+    </div>
+    {% endif %}
+</div>
+
+<!-- ================= MOBILE FUZZY ================= -->
+<div class="mobile-data-table mt-3">
+    <table>
+        <thead>
+            <tr>
+                <th colspan="2">Analisis Fuzzy Detail</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>EPS</td><td>{{ m.eps_level if m else '-' }}</td></tr>
+            <tr><td>PER</td><td>{{ m.per_level if m else '-' }}</td></tr>
+            <tr><td>ROE</td><td>{{ m.roe_level if m else '-' }}</td></tr>
+            <tr><td>DER</td><td>{{ m.der_level if m else '-' }}</td></tr>
+            <tr><td>FCF</td><td>{{ m.fcf_level if m else '-' }}</td></tr>
+            <tr><td>Trend MA50</td><td>{{ m.trend_ma50 if m else '-' }}</td></tr>
+            <tr><td>Trend MA200</td><td>{{ m.trend_ma200 if m else '-' }}</td></tr>
+            <tr><td>Gradient</td><td>{{ m.gradient_level if m else '-' }}</td></tr>
+            <tr><td>RSI</td><td>{{ m.rsi_level if m else '-' }}</td></tr>
+            <tr><td>Volume</td><td>{{ m.volume_level if m else '-' }}</td></tr>
+            <tr><td>Sentimen</td><td>{{ m.sentimen_level if m else '-' }}</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ================= NEWS ================= -->
+<div class="card soft-card news-card p-4 mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h6 class="fw-bold mb-0">Berita Emiten</h6>
+        <span class="badge bg-light text-dark">7 Hari Terakhir</span>
+    </div>
+
+    {% if not news %}
+    <div class="text-center py-4 text-muted">
+        <i class="bi bi-newspaper fs-1 d-block mb-2"></i>
+        Tidak ada berita terbaru.
+    </div>
+    {% endif %}
+
+    {% for n in news %}
+    <div class="news-item">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+                <a
+                    href="{{ n.link }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="fw-bold text-decoration-none text-dark">
+                    {{ n.judul }}
+                </a>
+
+                <div class="text-muted small mt-1">
+                    <i class="bi bi-clock me-1"></i>
+                    {{ n.date }}
+                </div>
+            </div>
+
+            {% if n.sentiment == 'positif' %}
+            <span class="badge bg-success">Positif</span>
+            {% elif n.sentiment == 'negatif' %}
+            <span class="badge bg-danger">Negatif</span>
+            {% else %}
+            <span class="badge bg-secondary">Netral</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <script>
-new TradingView.widget({
-    "width": "100%",
-    "height": 500,
-    "symbol": "IDX:{{ detail.ticker }}",
-    "interval": "D",
-    "timezone": "Asia/Jakarta",
-    "theme": "light",
-    "style": "1",                 // 1 = Candlestick
-    "locale": "id",
-    "toolbar_bg": "#f1f3f6",
-    "enable_publishing": false,
-    "withdateranges": true,
-    "allow_symbol_change": false,
-    "studies": [
-        "RSI@tv-basicstudies",
-        "MASimple@tv-basicstudies"
-    ],
-    "container_id": "tradingview_chart"
+document.addEventListener("DOMContentLoaded", function () {
+    renderInsight();
+    initializeTradingView();
 });
+
+function handleLogoError(image, fallbackLetter) {
+    const parent = image.parentElement;
+
+    image.remove();
+
+    if (parent) {
+        parent.textContent = fallbackLetter || "?";
+    }
+}
+
+function renderInsight() {
+    const source = document.getElementById("insightSource");
+    const container = document.getElementById("insightContent");
+
+    if (!source || !container) {
+        return;
+    }
+
+    try {
+        let insightText = JSON.parse(source.textContent);
+
+        if (typeof insightText !== "string" || !insightText.trim()) {
+            container.innerHTML =
+                '<p class="text-muted mb-0">Insight belum tersedia.</p>';
+            return;
+        }
+
+        insightText = normalizeInsightMarkdown(insightText);
+
+        if (typeof marked === "undefined") {
+            throw new Error("Library marked.js belum dimuat.");
+        }
+
+        marked.setOptions({
+            gfm: true,
+            breaks: true
+        });
+
+        const parsedContent = marked.parse(insightText);
+
+        if (typeof DOMPurify !== "undefined") {
+            container.innerHTML = DOMPurify.sanitize(parsedContent);
+        } else {
+            container.innerHTML = parsedContent;
+        }
+
+        container.querySelectorAll("a").forEach(function (link) {
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+        });
+    } catch (error) {
+        console.error("Gagal menampilkan insight:", error);
+
+        container.innerHTML =
+            '<p class="insight-error">' +
+            'Insight gagal ditampilkan. Silakan muat ulang halaman.' +
+            '</p>';
+    }
+}
+
+function normalizeInsightMarkdown(text) {
+    return text
+        .replace(/\r\n?/g, "\n")
+        .replace(/[ \t]+/g, " ")
+        .replace(/\s*---\s*/g, "\n\n---\n\n")
+        .replace(/\s+(?=#{1,6}\s)/g, "\n\n")
+        .replace(/\s+(?=\d+\.\s+(?:\*\*|#{1,6}))/g, "\n\n")
+        .replace(/\s+(?=-\s+\*\*)/g, "\n")
+        .replace(/\s+(?=\*\*Disclaimer(?:\s*:|\*\*))/gi, "\n\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+}
+
+function initializeTradingView() {
+    const container = document.getElementById("tradingview_chart");
+
+    if (!container) {
+        return;
+    }
+
+    if (typeof TradingView === "undefined") {
+        container.innerHTML =
+            '<div class="text-center text-muted py-5">' +
+            'Grafik belum dapat dimuat.' +
+            '</div>';
+        return;
+    }
+
+    const isMobile = window.matchMedia("(max-width: 576px)").matches;
+
+    new TradingView.widget({
+        width: "100%",
+        height: isMobile ? 300 : 500,
+        symbol: "IDX:{{ detail.ticker }}",
+        interval: "D",
+        timezone: "Asia/Jakarta",
+        theme: "light",
+        style: "1",
+        locale: "id",
+        toolbar_bg: "#f1f3f6",
+        enable_publishing: false,
+        withdateranges: !isMobile,
+        allow_symbol_change: false,
+        hide_top_toolbar: isMobile,
+        hide_legend: isMobile,
+        studies: isMobile
+            ? []
+            : [
+                "RSI@tv-basicstudies",
+                "MASimple@tv-basicstudies"
+            ],
+        container_id: "tradingview_chart"
+    });
+}
 </script>
 
 {% endblock %}

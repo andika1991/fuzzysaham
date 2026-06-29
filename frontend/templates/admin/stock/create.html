@@ -1,0 +1,154 @@
+{% extends 'admin/layout/base.html' %}
+{% set active_menu = 'ticker' %}
+
+{% block extra_style %}
+<style>
+    .page-header {
+        margin-bottom: 25px;
+    }
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+    }
+    .page-subtitle {
+        color: #64748b;
+        margin: 5px 0 0;
+    }
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        max-width: 600px;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .form-label span {
+        color: #dc2626;
+    }
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    .form-control::placeholder {
+        color: #9ca3af;
+    }
+    .mb-3 {
+        margin-bottom: 20px;
+    }
+    .btn-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 25px;
+    }
+    .btn-save {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        flex: 1;
+    }
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+    }
+    .btn-cancel {
+        background: #f1f5f9;
+        border: 2px solid #e5e7eb;
+        padding: 12px 30px;
+        border-radius: 12px;
+        color: #64748b;
+        font-weight: 600;
+        text-decoration: none;
+        flex: 1;
+        text-align: center;
+    }
+    .btn-cancel:hover {
+        background: #e2e8f0;
+    }
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #64748b;
+        text-decoration: none;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    .back-link:hover {
+        color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('admin_stock.index') }}" class="back-link">
+    <i class="bi bi-arrow-left"></i>Kembali ke Data Saham
+</a>
+
+<div class="form-card">
+    <h4 class="page-title mb-1">
+        {% if edit %}✏️ Edit Data Saham{% else %}➕ Tambah Data Saham{% endif %}
+    </h4>
+    <p class="page-subtitle mb-4">
+        {% if edit %}Ubah data saham LQ45{% else %}Tambah data saham LQ45{% endif %}
+    </p>
+
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Ticker <span>*</span></label>
+            <input type="text" name="ticker" class="form-control" 
+                   placeholder="BBRI" required
+                   value="{{ s.ticker if s else '' }}"
+                   style="text-transform: uppercase;">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nama Perusahaan <span>*</span></label>
+            <input type="text" name="nama_perusahaan" class="form-control" 
+                   placeholder="PT Bank Rakyat Indonesia" required
+                   value="{{ s.nama_perusahaan if s else '' }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Sektor</label>
+            <input type="text" name="sektor" class="form-control" 
+                   placeholder="Perbankan"
+                   value="{{ s.sektor if s else '' }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Industri</label>
+            <input type="text" name="industri" class="form-control" 
+                   placeholder="Bank Umum"
+                   value="{{ s.industri if s else '' }}">
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" class="btn-save">
+                <i class="bi bi-check-lg me-2"></i>Simpan
+            </button>
+            <a href="{{ url_for('admin_stock.index') }}" class="btn-cancel">
+                Batal
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

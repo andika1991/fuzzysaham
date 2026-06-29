@@ -6,6 +6,10 @@ from flask import request, jsonify, current_app, redirect
 from models.chat import Conversation, ChatMessage
 from flask import abort
 from models.fuzzy import FuzzyOutput
+from utils.pdf_export import generate_ranking_pdf
+from flask import request, render_template, make_response
+from models.news import News
+
 
 
 main_bp = Blueprint("main", __name__)
@@ -41,15 +45,46 @@ def admin_page():
 @user_bp.route("/ranking")
 @login_required
 def ranking():
+    tanggal = request.args.get("tanggal")
 
-    ranking_data = FuzzyOutput.get_latest_ranking()
+    available_dates = FuzzyOutput.get_available_dates()
+
+    if not tanggal:
+        latest_date = FuzzyOutput.get_latest_date()
+        tanggal = latest_date
+
+    ranking_data = []
+
+    if tanggal:
+        ranking_data = FuzzyOutput.get_ranking_by_date(tanggal)
 
     return render_template(
         "user/ranking.html",
-        ranking=ranking_data
+        ranking=ranking_data,
+        available_dates=available_dates,
+        selected_date=tanggal
     )
 
+@user_bp.route("/ranking/pdf")
+@login_required
+def ranking_pdf():
+    tanggal = request.args.get("tanggal")
 
+    if not tanggal:
+        tanggal = FuzzyOutput.get_latest_date()
+
+    ranking_data = []
+
+    if tanggal:
+        ranking_data = FuzzyOutput.get_ranking_by_date(tanggal)
+
+    pdf = generate_ranking_pdf(ranking_data, tanggal)
+
+    response = make_response(pdf)
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename=ranking-lq45-{tanggal}.pdf"
+
+    return response
 
 @user_bp.route("/konsultasi")
 @login_required
@@ -146,16 +181,43 @@ def delete_conversation(conversation_id):
 @user_bp.route("/saham/<ticker>")
 @login_required
 def detail_saham(ticker):
+    tanggal = request.args.get("tanggal")
 
-    detail, membership = StockDetail.get_detail_by_ticker(ticker)
-    news = StockDetail.get_recent_news(ticker)
+    if not tanggal:
+        tanggal = FuzzyOutput.get_latest_date()
 
-    if not detail:
-        return "Data tidak ditemukan", 404
+    detail = StockDetail.get_detail_by_ticker(ticker, tanggal)
+    membership = StockDetail.get_membership_by_ticker(ticker, tanggal)
+    news = []
 
     return render_template(
         "user/detail_saham.html",
         detail=detail,
         membership=membership,
-        news=news
+        news=news,
+        selected_date=tanggal
+    )
+
+
+
+from datetime import date
+
+@user_bp.route("/berita")
+@login_required
+def berita():
+    selected_date = request.args.get("tanggal")
+
+    if not selected_date:
+        selected_date = date.today().strftime("%Y-%m-%d")
+
+    news = News.get_all_news(selected_date)
+    available_dates = News.get_available_dates()
+    sentiment_summary = News.get_sentiment_summary(selected_date)
+
+    return render_template(
+        "user/berita.html",
+        news=news,
+        available_dates=available_dates,
+        selected_date=selected_date,
+        sentiment_summary=sentiment_summary
     )

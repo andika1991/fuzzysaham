@@ -1,33 +1,48 @@
-<div class="modal fade" id="registerModal" tabindex="-1">
+<div class="modal fade auth-modal" id="registerModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
+    <div class="modal-content auth-modal-content">
 
       <form method="POST" action="/register">
-        <div class="modal-header">
-          <h5 class="modal-title fw-bold">Registrasi Akun</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="auth-modal-header">
+         
+
+          <div>
+            <h5 class="modal-title fw-bold mb-1">Registrasi Akun</h5>
+            <p class="text-muted mb-0">Buat akun untuk mulai menggunakan FuzzyInvest.</p>
+          </div>
+
+          <button type="button" class="btn-close auth-close" data-bs-dismiss="modal"></button>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-body auth-modal-body">
           <div class="mb-3">
             <label class="form-label">Username</label>
-            <input type="text" name="username" class="form-control" required>
+            <div class="auth-input">
+              <i class="bi bi-person"></i>
+              <input type="text" name="username" class="form-control" placeholder="Masukkan username" required>
+            </div>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" required>
+            <div class="auth-input">
+              <i class="bi bi-lock"></i>
+              <input type="password" name="password" class="form-control" placeholder="Masukkan password" required>
+            </div>
           </div>
 
-          <div class="mb-3">
+          <div class="mb-1">
             <label class="form-label">Konfirmasi Password</label>
-            <input type="password" name="confirm_password" class="form-control" required>
+            <div class="auth-input">
+              <i class="bi bi-shield-lock"></i>
+              <input type="password" name="confirm_password" class="form-control" placeholder="Ulangi password" required>
+            </div>
           </div>
         </div>
 
-        <div class="modal-footer d-flex flex-column">
-          <button type="submit" class="btn btn-primary w-100">
-            Daftar
+        <div class="modal-footer auth-modal-footer">
+          <button type="submit" class="btn btn-primary w-100 auth-submit">
+            <i class="bi bi-check-circle me-2"></i>Daftar
           </button>
 
           <small class="text-muted mt-2">
@@ -44,3 +59,131 @@
     </div>
   </div>
 </div>
+
+<style>
+.auth-modal-content {
+  border: 0;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+}
+
+.auth-modal-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 24px 24px 18px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.auth-modal-header p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.auth-icon {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border-radius: 14px;
+  background: #2563eb;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 21px;
+}
+
+.auth-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+}
+
+.auth-modal-body {
+  padding: 22px 24px 10px;
+}
+
+.auth-modal-body .form-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 7px;
+}
+
+.auth-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid #dbe3ef;
+  border-radius: 14px;
+  padding: 0 13px;
+  transition: all 0.2s ease;
+}
+
+.auth-input:focus-within {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+}
+
+.auth-input i {
+  color: #64748b;
+  font-size: 17px;
+}
+
+.auth-input .form-control {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 13px 0;
+  font-size: 14px;
+}
+
+.auth-modal-footer {
+  border-top: 0;
+  padding: 12px 24px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-submit {
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-weight: 800;
+}
+
+.auth-modal-footer a {
+  color: #2563eb;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.auth-modal-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 576px) {
+  .auth-modal .modal-dialog {
+    margin: 14px;
+  }
+
+  .auth-modal-content {
+    border-radius: 18px;
+  }
+
+  .auth-modal-header {
+    padding: 20px 18px 16px;
+  }
+
+  .auth-modal-body {
+    padding: 18px 18px 8px;
+  }
+
+  .auth-modal-footer {
+    padding: 10px 18px 20px;
+  }
+}
+</style>

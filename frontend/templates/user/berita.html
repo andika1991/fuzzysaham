@@ -1,0 +1,317 @@
+{% extends 'user/layout/base.html' %}
+{% block title %}Berita - FuzzyInvest{% endblock %}
+{% block content %}
+
+
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center mb-4 gap-3">
+    <div>
+        <h4 class="mb-1 fw-bold">Berita Pasar</h4>
+        <p class="text-muted mb-0" style="font-size: 14px;">
+            Berita emiten dan berita umum hasil analisis sentimen.
+        </p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <h6 class="fw-bold mb-3">Distribusi Sentimen Market</h6>
+            <div style="height: 230px;">
+                <canvas id="sentimentChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+        <div class="row g-3 h-100">
+            <div class="col-4">
+                <div class="sentiment-stat positive-stat">
+                    <span>Positif</span>
+                    <strong>{{ sentiment_summary.positif }}</strong>
+                </div>
+            </div>
+
+            <div class="col-4">
+                <div class="sentiment-stat neutral-stat">
+                    <span>Netral</span>
+                    <strong>{{ sentiment_summary.netral }}</strong>
+                </div>
+            </div>
+
+            <div class="col-4">
+                <div class="sentiment-stat negative-stat">
+                    <span>Negatif</span>
+                    <strong>{{ sentiment_summary.negatif }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="GET" action="{{ url_for('user.berita') }}">
+    <div class="row g-3">
+        <div class="col-12 col-lg-4">
+            <input type="search"
+                   class="form-control"
+                   id="searchInput"
+                   placeholder="Cari judul atau ticker..."
+                   onkeyup="filterNews()">
+        </div>
+
+        <div class="col-12 col-lg-3">
+            <select class="form-select" id="sentimentFilter" onchange="filterNews()">
+                <option value="">Semua Sentimen</option>
+                <option value="positif">Positif</option>
+                <option value="netral">Netral</option>
+                <option value="negatif">Negatif</option>
+            </select>
+        </div>
+
+        <div class="col-12 col-lg-3">
+            <select name="tanggal" class="form-select">
+                {% for item in available_dates %}
+                    <option value="{{ item.tanggal }}"
+                            {% if selected_date and item.tanggal|string == selected_date|string %}selected{% endif %}>
+                        {{ item.tanggal.strftime('%d %b %Y') }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-12 col-lg-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-funnel me-1"></i> Filter
+            </button>
+        </div>
+    </div>
+</form>
+<br>
+<br>
+<div class="news-list">
+    {% if news|length == 0 %}
+        <div class="card border-0 rounded-4 p-5 text-center">
+            <i class="bi bi-newspaper fs-1 text-muted mb-3"></i>
+            <p class="text-muted mb-0">Belum ada berita tersimpan.</p>
+        </div>
+    {% endif %}
+
+    {% for n in news %}
+        <div class="news-card"
+             data-title="{{ n.judul|lower }}"
+             data-ticker="{{ (n.ticker or 'umum')|lower }}"
+             data-sentiment="{{ n.sentiment|lower }}">
+
+            <div class="news-main">
+                <div class="news-meta">
+                    {% if n.ticker %}
+                        <span class="ticker-badge">{{ n.ticker }}</span>
+                    {% else %}
+                        <span class="ticker-badge ticker-general">UMUM</span>
+                    {% endif %}
+
+                    {% if n.sentiment == 'positif' %}
+                        <span class="sentiment-badge sentiment-positive">Positif</span>
+                    {% elif n.sentiment == 'negatif' %}
+                        <span class="sentiment-badge sentiment-negative">Negatif</span>
+                    {% else %}
+                        <span class="sentiment-badge sentiment-neutral">Netral</span>
+                    {% endif %}
+                </div>
+
+                <a href="{{ n.link }}"
+                   target="_blank"
+                   class="news-title">
+                    {{ n.judul }}
+                </a>
+
+                <div class="news-date">
+                    <i class="bi bi-clock me-1"></i>
+                    {{ n.date.strftime('%d %b %Y') if n.date else '-' }}
+                </div>
+            </div>
+
+            <a href="{{ n.link }}" target="_blank" class="open-link">
+                <i class="bi bi-box-arrow-up-right"></i>
+            </a>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+function filterNews() {
+    const search = document.getElementById("searchInput").value.toLowerCase();
+    const sentiment = document.getElementById("sentimentFilter").value.toLowerCase();
+
+    document.querySelectorAll(".news-card").forEach(card => {
+        const title = card.dataset.title;
+        const ticker = card.dataset.ticker;
+        const cardSentiment = card.dataset.sentiment;
+
+        const matchSearch = title.includes(search) || ticker.includes(search);
+        const matchSentiment = !sentiment || cardSentiment === sentiment;
+
+        card.style.display = matchSearch && matchSentiment ? "" : "none";
+    });
+}
+</script>
+
+<style>
+.news-list {
+    display: grid;
+    gap: 12px;
+}
+
+.news-card {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.news-main {
+    min-width: 0;
+}
+
+.news-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.ticker-badge,
+.sentiment-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 5px 8px;
+    border-radius: 999px;
+}
+
+.ticker-badge {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.ticker-general {
+    background: #e5e7eb;
+    color: #475569;
+}
+
+.sentiment-positive {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.sentiment-neutral {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.sentiment-negative {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.news-title {
+    display: block;
+    color: #0f172a;
+    font-weight: 800;
+    text-decoration: none;
+    line-height: 1.5;
+}
+
+.news-title:hover {
+    color: #2563eb;
+}
+
+.news-date {
+    color: #64748b;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.open-link {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: #f8fafc;
+    color: #2563eb;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.open-link:hover {
+    background: #dbeafe;
+}
+
+@media (max-width: 576px) {
+    .news-card {
+        padding: 12px;
+        border-radius: 12px;
+        gap: 10px;
+    }
+
+    .news-title {
+        font-size: 13px;
+    }
+
+    .open-link {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        font-size: 13px;
+    }
+
+    .ticker-badge,
+    .sentiment-badge {
+        font-size: 10px;
+        padding: 4px 7px;
+    }
+}
+</style>
+
+
+<script>
+const sentimentData = {
+    positif: {{ sentiment_summary.positif }},
+    netral: {{ sentiment_summary.netral }},
+    negatif: {{ sentiment_summary.negatif }}
+};
+
+const ctx = document.getElementById("sentimentChart");
+
+if (ctx) {
+    new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            labels: ["Positif", "Netral", "Negatif"],
+            datasets: [{
+                data: [
+                    sentimentData.positif,
+                    sentimentData.netral,
+                    sentimentData.negatif
+                ],
+                backgroundColor: ["#22c55e", "#f59e0b", "#ef4444"],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "68%",
+            plugins: {
+                legend: {
+                    position: "bottom"
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

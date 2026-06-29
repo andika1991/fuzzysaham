@@ -1,170 +1,549 @@
+```html
 {% extends 'user/layout/base.html' %}
 
 {% block content %}
 
-<div class="mb-4">
-    <h4 class="mb-1">Ranking Saham LQ45</h4>
-    <small class="text-muted">
-        Berdasarkan hasil perhitungan Fuzzy Mamdani (Hari Ini)
-    </small>
+<!-- ================= PAGE HEADER ================= -->
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center mb-4 gap-3">
+    <div>
+        <h4 class="mb-1 fw-bold">Ranking Saham LQ45</h4>
+        <p class="text-muted mb-0" style="font-size: 14px;">
+            Berdasarkan hasil perhitungan <span class="badge bg-light text-dark">Fuzzy Mamdani</span>
+        </p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('user.ranking_pdf', tanggal=selected_date) }}"
+           class="btn btn-outline-secondary btn-sm"
+           style="white-space: nowrap;">
+            <i class="bi bi-file-earmark-pdf me-2"></i>Cetak PDF
+        </a>
+    </div>
 </div>
 
-<!-- SUMMARY -->
-<div class="row g-4 mb-5">
-
-    <div class="col-md-4">
-        <div class="dashboard-card card-blue p-4">
-            <h6>Total Saham</h6>
-            <h3>{{ ranking|length }}</h3>
-        </div>
+<!-- ================= SUMMARY MOBILE ================= -->
+<div class="summary-mobile-strip mb-3">
+    <div class="summary-pill">
+        <span>Total</span>
+        <strong>{{ ranking|length }}</strong>
     </div>
 
-    <div class="col-md-4">
-        <div class="dashboard-card card-green p-4">
-            <h6>Skor Tertinggi</h6>
-            {% if ranking %}
-                <h3>{{ "%.4f"|format(ranking[0].fuzzy_score) }}</h3>
-            {% else %}
-                <h3>-</h3>
-            {% endif %}
-        </div>
-    </div>
-    <div class="col-md-4">
-    <div class="dashboard-card card-orange p-4">
-        <h6>Tanggal Ranking</h6>
+    <div class="summary-pill">
+        <span>Top</span>
         {% if ranking %}
-            <h6>{{ ranking[0].created_at.strftime('%d %B %Y') }}</h6>
+            <strong>{{ "%.1f"|format(ranking[0].fuzzy_score * 100) }}%</strong>
         {% else %}
-            <h6>-</h6>
+            <strong>-</strong>
+        {% endif %}
+    </div>
+
+    <div class="summary-pill">
+        <span>Tanggal</span>
+        {% if ranking %}
+            <strong>{{ ranking[0].created_at.strftime('%d %b') }}</strong>
+        {% else %}
+            <strong>-</strong>
         {% endif %}
     </div>
 </div>
 
+<!-- ================= SUMMARY DESKTOP ================= -->
+<div class="row g-3 mb-4 summary-desktop-grid">
+    <div class="col-6 col-lg-4">
+        <div class="dashboard-card card-blue p-3 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="mb-1 opacity-75" style="font-size: 13px;">Total Saham</p>
+                    <h3 class="mb-0 fw-bold">{{ ranking|length }}</h3>
+                </div>
+                <div class="icon-box"><i class="bi bi-collection"></i></div>
+            </div>
+        </div>
+    </div>
 
+    <div class="col-6 col-lg-4">
+        <div class="dashboard-card card-green p-3 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="mb-1 opacity-75" style="font-size: 13px;">Skor Tertinggi</p>
+                    {% if ranking %}
+                        <h3 class="mb-0 fw-bold">
+                            {{ "%.2f"|format(ranking[0].fuzzy_score * 100) }}<small style="font-size: 14px;">%</small>
+                        </h3>
+                    {% else %}
+                        <h3 class="mb-0 fw-bold">-</h3>
+                    {% endif %}
+                </div>
+                <div class="icon-box"><i class="bi bi-trophy"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-4">
+        <div class="dashboard-card card-orange p-3 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="mb-1 opacity-75" style="font-size: 13px;">Tanggal Ranking</p>
+                    {% if ranking %}
+                        <h5 class="mb-0 fw-bold">{{ ranking[0].created_at.strftime('%d %b %Y') }}</h5>
+                    {% else %}
+                        <h5 class="mb-0 fw-bold">-</h5>
+                    {% endif %}
+                </div>
+                <div class="icon-box"><i class="bi bi-calendar3"></i></div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- LIST CARD -->
-<div class="row g-4">
+<!-- ================= FILTERS ================= -->
+<div class="card shadow-sm border-0 rounded-4 p-3 mb-4 filter-card">
+    <form method="GET" action="{{ url_for('user.ranking') }}">
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-lg-5">
+                <input type="search"
+                       class="form-control"
+                       placeholder="Cari ticker..."
+                       id="searchInput"
+                       onkeyup="filterRanking()">
+            </div>
 
-{% if ranking|length == 0 %}
-    <div class="col-12 text-center text-muted py-5">
-        Tidak ada data ranking hari ini
-    </div>
-{% endif %}
+            <div class="col-12 col-lg-5">
+                <select name="tanggal" class="form-select">
+                    {% for item in available_dates %}
+                        <option value="{{ item.tanggal }}"
+                                {% if selected_date and item.tanggal|string == selected_date|string %}selected{% endif %}>
+                            {{ item.tanggal.strftime('%d %b %Y') }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-{% for saham in ranking %}
+            <div class="col-12 col-lg-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel me-1"></i> Filter
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
 
-<div class="col-12">
+<!-- ================= RANKING LIST ================= -->
+<div class="row g-3 ranking-list">
+    {% if ranking|length == 0 %}
+        <div class="col-12">
+            <div class="card border-0 rounded-4 p-5 text-center empty-card">
+                <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+                <p class="text-muted mb-0">Tidak ada data ranking hari ini</p>
+            </div>
+        </div>
+    {% endif %}
 
-    <a href="{{ url_for('user.detail_saham', ticker=saham.ticker) }}"
-       class="text-decoration-none text-dark">
+    {% for sah in ranking %}
+    <div class="col-12 ranking-item"
+         data-ticker="{{ sah.ticker|lower }}"
+         data-kategori="{{ sah.kategori }}"
+         data-score="{{ sah.fuzzy_score }}">
 
-        <div class="card border-0 rounded-4 p-4 ranking-card 
-            {% if loop.index == 1 %}top-ranked{% endif %}">
+        <a href="{{ url_for('user.detail_saham', ticker=sah.ticker, tanggal=selected_date) }}"
+           class="text-decoration-none">
 
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="card border-0 rounded-4 p-3 p-lg-4 ranking-card {% if loop.index <= 3 %}top-ranked{% endif %}">
+                <div class="ranking-content d-flex justify-content-between align-items-center flex-wrap gap-3">
 
-                <!-- LEFT SECTION -->
-                <div class="d-flex align-items-center">
+                    <div class="ranking-left d-flex align-items-center flex-grow-1">
+                        <div class="rank-badge me-3">
+                            {% if loop.index == 1 %}
+                                <span class="badge bg-warning text-dark fs-6">1</span>
+                            {% elif loop.index == 2 %}
+                                <span class="badge bg-secondary fs-6">2</span>
+                            {% elif loop.index == 3 %}
+                                <span class="badge bg-secondary fs-6">3</span>
+                            {% else %}
+                                <span class="badge bg-light text-dark">#{{ loop.index }}</span>
+                            {% endif %}
+                        </div>
 
-                    <!-- Medal -->
-                    <div class="me-3 fs-4">
-                        {% if loop.index == 1 %}
-                            🥇
-                        {% elif loop.index == 2 %}
-                            🥈
-                        {% elif loop.index == 3 %}
-                            🥉
-                        {% else %}
-                            #{{ loop.index }}
-                        {% endif %}
+<div class="logo-wrapper me-3 flex-shrink-0">
+    <img src="https://assets.stockbit.com/logos/companies/{{ sah.ticker }}.png"
+         alt="{{ sah.ticker }}"
+         class="logo-img"
+         onerror="this.onerror=null;this.src='{{ url_for('static', filename='logo/default.png') }}';">
+</div>
+
+                        <div class="min-width-0">
+                            <h6 class="mb-0 fw-bold text-truncate">{{ sah.ticker }}</h6>
+                            <small class="text-muted text-truncate d-none d-md-block">{{ sah.nama_perusahaan }}</small>
+                        </div>
                     </div>
 
-                    <!-- Logo -->
-                    <div class="logo-wrapper me-3">
-                        <img src="{{ url_for('static', filename='logo/' ~ saham.ticker ~ '.png') }}"
-                             alt="{{ saham.ticker }}"
-                             class="logo-img"
-                             onerror="this.onerror=null;this.src='{{ url_for('static', filename='logo/default.png') }}';">
-                    </div>
+                    <div class="ranking-right d-flex align-items-center gap-3">
+                        <div class="score-section" style="min-width: 100px;">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-muted" style="font-size: 12px;">Skor</span>
+                                <span class="fw-bold {% if sah.fuzzy_score >= 0.8 %}text-success{% elif sah.fuzzy_score >= 0.6 %}text-warning{% else %}text-danger{% endif %}">
+                                    {{ "%.1f"|format(sah.fuzzy_score * 100) }}%
+                                </span>
+                            </div>
 
-                    <!-- Nama -->
-                    <div>
-                        <h6 class="mb-0 fw-bold">{{ saham.ticker }}</h6>
-                        <small class="text-muted">
-                            {{ saham.nama_perusahaan }}
-                        </small>
-                    </div>
-
-                </div>
-
-                <!-- RIGHT SECTION -->
-                <div class="text-end">
-
-                    <!-- Harga -->
-                    <div class="fw-bold fs-5">
-                        Rp {{ "{:,.0f}".format(saham.close_price) }}
-                    </div>
-
-                    <!-- Skor -->
-                    <div class="mt-2">
-                        <small class="text-muted">Skor Fuzzy</small>
-
-                        <div class="progress mt-1" style="height:6px; width:170px;">
-                            <div class="progress-bar 
-                                {% if saham.fuzzy_score >= 0.8 %}
-                                    bg-success
-                                {% elif saham.fuzzy_score >= 0.6 %}
-                                    bg-warning
-                                {% else %}
-                                    bg-danger
-                                {% endif %}
-                            "
-                            style="width: {{ saham.fuzzy_score * 100 }}%;">
+                            <div class="progress" style="height: 8px; border-radius: 4px;">
+                                <div class="progress-bar {% if sah.fuzzy_score >= 0.8 %}bg-success{% elif sah.fuzzy_score >= 0.6 %}bg-warning{% else %}bg-danger{% endif %}"
+                                     style="width: {{ sah.fuzzy_score * 100 }}%;">
+                                </div>
                             </div>
                         </div>
 
-                        <small class="fw-semibold">
-                            {{ "%.4f"|format(saham.fuzzy_score) }}
-                        </small>
-                    </div>
+                        <div class="category-full d-flex gap-2 flex-shrink-0">
+                            {% if sah.kategori == "Potensial" %}
+                                <span class="badge bg-success">Potensial</span>
+                            {% elif sah.kategori == "Netral" %}
+                                <span class="badge bg-warning text-dark">Netral</span>
+                            {% else %}
+                                <span class="badge bg-danger">Risiko</span>
+                            {% endif %}
+                        </div>
 
-                    <!-- Horizon -->
-                    <div class="mt-2">
-                        {% if saham.horizon %}
-                            <span class="badge bg-info px-3 py-2 me-1">
-                                {{ saham.horizon }}
-                            </span>
-                        {% endif %}
-
-                        {% if saham.kategori == "Potensial" %}
-                            <span class="badge bg-success px-3 py-2">
-                                {{ saham.kategori }}
-                            </span>
-                        {% elif saham.kategori == "Netral" %}
-                            <span class="badge bg-warning text-dark px-3 py-2">
-                                {{ saham.kategori }}
-                            </span>
-                        {% else %}
-                            <span class="badge bg-secondary px-3 py-2">
-                                {{ saham.kategori }}
-                            </span>
-                        {% endif %}
+                        <div class="category-short flex-shrink-0">
+                            {% if sah.kategori == "Potensial" %}
+                                <span class="badge bg-success">P</span>
+                            {% elif sah.kategori == "Netral" %}
+                                <span class="badge bg-warning text-dark">N</span>
+                            {% else %}
+                                <span class="badge bg-danger">R</span>
+                            {% endif %}
+                        </div>
                     </div>
 
                 </div>
-
             </div>
-
-        </div>
-
-    </a>
-
+        </a>
+    </div>
+    {% endfor %}
 </div>
 
-{% endfor %}
+<button class="btn btn-primary btn-circle floating-btn"
+        onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+        id="backToTop">
+    <i class="bi bi-arrow-up"></i>
+</button>
 
+<script>
+function filterRanking() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
 
-</div>
+    document.querySelectorAll('.ranking-item').forEach(item => {
+        const ticker = item.dataset.ticker;
+        item.style.display = ticker.includes(search) ? '' : 'none';
+    });
+}
+
+window.addEventListener('scroll', function() {
+    document.getElementById('backToTop').style.opacity = window.scrollY > 300 ? '1' : '0';
+});
+</script>
+
+<style>
+.summary-mobile-strip,
+.category-short {
+    display: none;
+}
+
+.dashboard-card {
+    border-radius: 16px;
+    transition: all 0.2s ease;
+    color: white;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-blue { background: #1d4ed8; }
+.card-green { background: #059669; }
+.card-orange { background: #d97706; }
+
+.icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: rgba(255,255,255,0.2);
+}
+
+.ranking-card {
+    transition: all 0.25s ease;
+    border: 1px solid #e5e7eb !important;
+}
+
+.ranking-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6 !important;
+}
+
+.top-ranked {
+    border-left: 4px solid #28a745 !important;
+    background: #f0fff4;
+}
+
+.logo-wrapper {
+    width: 44px;
+    height: 44px;
+    background: #f5f7fa;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.logo-img {
+    max-width: 80%;
+    max-height: 80%;
+    object-fit: contain;
+}
+
+.floating-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .summary-desktop-grid {
+        display: none;
+    }
+
+    .summary-mobile-strip {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        margin-bottom: 10px !important;
+    }
+
+    .summary-pill {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 7px 8px;
+        min-width: 0;
+    }
+
+    .summary-pill span {
+        display: block;
+        color: #64748b;
+        font-size: 9px;
+        font-weight: 700;
+        margin-bottom: 1px;
+    }
+
+    .summary-pill strong {
+        display: block;
+        color: #0f172a;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .filter-card {
+        padding: 8px !important;
+        border-radius: 12px !important;
+        margin-bottom: 10px !important;
+    }
+
+    .filter-card .row {
+        --bs-gutter-y: 6px;
+    }
+
+    .filter-card .form-control,
+    .filter-card .form-select,
+    .filter-card .btn {
+        font-size: 12px;
+        min-height: 34px;
+        padding: 5px 8px;
+        border-radius: 9px;
+    }
+
+    .ranking-list {
+        --bs-gutter-y: 6px;
+    }
+
+    .ranking-card {
+        padding: 8px 10px !important;
+        border-radius: 10px !important;
+        box-shadow: none !important;
+        border: 1px solid #e5e7eb !important;
+    }
+
+    .ranking-card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .ranking-content {
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+        align-items: center !important;
+    }
+
+    .ranking-left {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .rank-badge {
+        display: none;
+    }
+
+    .logo-wrapper {
+        display: none;
+    }
+
+    .ranking-card h6 {
+        font-size: 13px;
+        line-height: 1.1;
+    }
+
+    .ranking-card small {
+        display: none !important;
+    }
+
+    .ranking-right {
+        gap: 6px !important;
+        flex-shrink: 0;
+    }
+
+    .score-section {
+        min-width: auto !important;
+    }
+
+    .score-section .d-flex {
+        margin-bottom: 0 !important;
+    }
+
+    .score-section .text-muted {
+        display: none;
+    }
+
+    .score-section .fw-bold {
+        font-size: 12px;
+        line-height: 1;
+    }
+
+    .score-section .progress {
+        display: none;
+    }
+
+    .category-full {
+        display: none !important;
+    }
+
+    .category-short {
+        display: block;
+    }
+
+    .ranking-card .badge {
+        font-size: 9px;
+        padding: 4px 5px;
+        border-radius: 7px;
+        line-height: 1;
+    }
+
+    .top-ranked {
+        border-left: 0 !important;
+        background: #ffffff;
+    }
+
+    .empty-card {
+        padding: 22px 12px !important;
+        border-radius: 12px !important;
+    }
+
+    .floating-btn {
+        width: 38px;
+        height: 38px;
+        right: 14px;
+        bottom: 84px;
+    }
+}
+
+@media (max-width: 420px) {
+    .summary-mobile-strip {
+        gap: 6px;
+    }
+
+    .summary-pill {
+        padding: 8px;
+    }
+
+    .summary-pill strong {
+        font-size: 12px;
+    }
+
+    .ranking-card {
+        padding: 8px 9px !important;
+    }
+
+    .score-section .fw-bold {
+        font-size: 11px;
+    }
+
+    .ranking-card .badge {
+        font-size: 9px;
+        padding: 4px 5px;
+    }
+}
+
+@media (max-width: 576px) {
+    .fuzzy-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .fuzzy-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        min-height: auto;
+    }
+
+    .fuzzy-item i {
+        display: none;
+    }
+
+    .fuzzy-item small {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .fuzzy-item div {
+        font-size: 13px;
+        font-weight: 800;
+        color: #0f172a;
+        text-align: right;
+    }
+}
+</style>
+
 
 {% endblock %}

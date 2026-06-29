@@ -21,11 +21,7 @@ def health():
 # =====================================================
 @app.route("/stock/fetch", methods=["POST"])
 def fetch_stock():
-    """
-    mode:
-    - daily  → ambil 1 hari terakhir (default)
-    - full   → ambil data historis (5 tahun)
-    """
+
     mode = request.args.get("mode", "daily")
 
     try:
@@ -47,13 +43,7 @@ def fetch_stock():
 # =====================================================
 @app.route("/fuzzy/run", methods=["POST"])
 def run_fuzzy_api():
-    """
-    Menjalankan:
-    - fuzzifikasi
-    - inferensi
-    - defuzzifikasi
-    - simpan ke fuzzy_membership & fuzzy_output
-    """
+
     try:
         result = run_fuzzy()
         return jsonify({

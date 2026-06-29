@@ -38,7 +38,7 @@ class User(UserMixin):
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO user (username, password, role) VALUES (%s, %s, %s)",
-            (username, passwod_hash, "user")
+            (username, password_hash, "user")
         )
         conn.commit()
         cursor.close()
