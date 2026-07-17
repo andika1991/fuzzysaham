@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template
 from flask_login import login_required,current_user
+from models import detail
+from models.stock import StockModel
 from models.detail import StockDetail
 from openai import OpenAI
 from flask import request, jsonify, current_app, redirect
@@ -9,7 +11,7 @@ from models.fuzzy import FuzzyOutput
 from utils.pdf_export import generate_ranking_pdf
 from flask import request, render_template, make_response
 from models.news import News
-
+from models.dashboard import DashboardModel
 
 
 main_bp = Blueprint("main", __name__)
@@ -25,15 +27,37 @@ def home():
 @main_bp.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("user/dashboard.html")
+    total_saham = DashboardModel.get_total_saham()
 
+    return render_template(
+        "user/dashboard.html",
+        total_saham=total_saham
+    )
 @main_bp.route("/user")
 @login_required
 def user_page():
     if current_user.role != "user":
         return abort(403)
-    return render_template("user/dashboard.html")
 
+    total_saham = DashboardModel.get_total_saham()
+    last_update = DashboardModel.get_last_update()
+    total_rekomendasi = DashboardModel.get_total_rekomendasi()
+    toprank = DashboardModel.toprank()
+    top5_ranking = DashboardModel.get_top5_ranking()
+    top_gainer = DashboardModel.get_top_gainer()
+    top_loser = DashboardModel.get_top_loser()
+
+    return render_template(
+        "user/dashboard.html",
+        total_saham=total_saham,
+        last_update=last_update,
+        total_rekomendasi=total_rekomendasi,
+        toprank=toprank,
+        top5_ranking=top5_ranking,
+        top_gainer=top_gainer,
+        top_loser=top_loser
+
+    )
 
 @main_bp.route("/admin")
 @login_required
@@ -189,13 +213,17 @@ def detail_saham(ticker):
     detail = StockDetail.get_detail_by_ticker(ticker, tanggal)
     membership = StockDetail.get_membership_by_ticker(ticker, tanggal)
     news = []
+    performance = StockModel.get_stock_performance(detail["id_stock"])
+
 
     return render_template(
         "user/detail_saham.html",
         detail=detail,
         membership=membership,
         news=news,
-        selected_date=tanggal
+        selected_date=tanggal,
+        performance=performance
+
     )
 
 

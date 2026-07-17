@@ -10,3 +10,5 @@ werkzeug==3.0.1
 mysql-connector-python==8.3.0
 openai
 reportlab
+pandas
+schedule

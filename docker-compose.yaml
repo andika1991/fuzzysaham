@@ -62,6 +62,8 @@ services:
       - .env
     ports:
       - "5000:5000"
+    environment:
+      TZ: Asia/Jakarta
 
 volumes:
   mysql_data:

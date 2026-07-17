@@ -5,6 +5,7 @@ from models.user import User
 from main.routes import main_bp, user_bp
 from main.routes_admin import admin_stock
 from main.rule_routes import admin_rule
+from scheduler import start_scheduler
 
 def create_app():
     app = Flask(__name__)
@@ -31,4 +32,5 @@ def create_app():
 app = create_app()
 
 if __name__ == "__main__":
+    start_scheduler()
     app.run(debug=True)

@@ -22,31 +22,171 @@
         </div>
     </div>
 
-    <div class="col-12 col-lg-8">
+
+<div class="col-12 col-lg-8">
+
+    <!-- ================= DESKTOP ================= -->
+    <div class="d-none d-md-block">
+
         <div class="row g-3 h-100">
-            <div class="col-4">
-                <div class="sentiment-stat positive-stat">
-                    <span>Positif</span>
-                    <strong>{{ sentiment_summary.positif }}</strong>
+{% set total = sentiment_summary.positif + sentiment_summary.netral + sentiment_summary.negatif %}
+            <!-- Positif -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100 bg-success-subtle">
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-emoji-smile-fill text-success fs-1"></i>
+
+                        <h6 class="fw-bold mt-3 mb-1">
+                            Positif
+                        </h6>
+
+                        <h2 class="fw-bold text-success">
+                            {{ sentiment_summary.positif }}
+                        </h2>
+
+                        <small class="text-muted">
+                            Berita Positif
+                        </small>
+
+                        <hr>
+
+    <span class="badge bg-success">
+    {% if total %}
+        {{ ((sentiment_summary.positif / total) * 100)|round(1) }}%
+    {% else %}
+        -
+    {% endif %}
+</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="col-4">
-                <div class="sentiment-stat neutral-stat">
-                    <span>Netral</span>
-                    <strong>{{ sentiment_summary.netral }}</strong>
+            <!-- Netral -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100 bg-warning-subtle">
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-dash-circle-fill text-warning fs-1"></i>
+
+                        <h6 class="fw-bold mt-3 mb-1">
+                            Netral
+                        </h6>
+
+                        <h2 class="fw-bold text-warning">
+                            {{ sentiment_summary.netral }}
+                        </h2>
+
+                        <small class="text-muted">
+                            Berita Netral
+                        </small>
+
+                        <hr>
+
+                        <span class="badge bg-warning text-dark">
+    {% if total %}
+        {{ ((sentiment_summary.netral / total) * 100)|round(1) }}%
+    {% else %}
+        -
+    {% endif %}
+</span>
+
+      
+                    </div>
                 </div>
             </div>
 
-            <div class="col-4">
-                <div class="sentiment-stat negative-stat">
-                    <span>Negatif</span>
-                    <strong>{{ sentiment_summary.negatif }}</strong>
+            <!-- Negatif -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100 bg-danger-subtle">
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-emoji-frown-fill text-danger fs-1"></i>
+
+                        <h6 class="fw-bold mt-3 mb-1">
+                            Negatif
+                        </h6>
+
+                        <h2 class="fw-bold text-danger">
+                            {{ sentiment_summary.negatif }}
+                        </h2>
+
+                        <small class="text-muted">
+                            Berita Negatif
+                        </small>
+
+                        <hr>
+<span class="badge bg-danger">
+    {% if total %}
+        {{ ((sentiment_summary.negatif / total) * 100)|round(1) }}%
+    {% else %}
+        -
+    {% endif %}
+</span>  
+                    </div>
                 </div>
             </div>
+
         </div>
+
     </div>
+
+
+    <!-- ================= MOBILE ================= -->
+    <div class="d-block d-md-none">
+
+        <div class="card border-0 shadow-sm rounded-4">
+
+            <div class="card-body">
+
+                <div class="row text-center">
+
+                    <div class="col-4 border-end">
+                        <i class="bi bi-emoji-smile-fill text-success fs-4"></i>
+
+                        <div class="fw-bold fs-5 text-success mt-1">
+                            {{ sentiment_summary.positif }}
+                        </div>
+
+                        <small class="text-muted">
+                            Positif
+                        </small>
+                    </div>
+
+                    <div class="col-4 border-end">
+                        <i class="bi bi-dash-circle-fill text-warning fs-4"></i>
+
+                        <div class="fw-bold fs-5 text-warning mt-1">
+                            {{ sentiment_summary.netral }}
+                        </div>
+
+                        <small class="text-muted">
+                            Netral
+                        </small>
+                    </div>
+
+                    <div class="col-4">
+                        <i class="bi bi-emoji-frown-fill text-danger fs-4"></i>
+
+                        <div class="fw-bold fs-5 text-danger mt-1">
+                            {{ sentiment_summary.negatif }}
+                        </div>
+
+                        <small class="text-muted">
+                            Negatif
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+
 
 <form method="GET" action="{{ url_for('user.berita') }}">
     <div class="row g-3">
@@ -249,6 +389,7 @@ function filterNews() {
 .open-link:hover {
     background: #dbeafe;
 }
+
 
 @media (max-width: 576px) {
     .news-card {

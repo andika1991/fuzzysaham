@@ -17,6 +17,7 @@ class StockDetail:
                 fo.insight,
 
                 s.ticker,
+                s.id_stock,
                 s.nama_perusahaan,
 
                 sd.close_price,

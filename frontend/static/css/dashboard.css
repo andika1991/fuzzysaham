@@ -1,0 +1,573 @@
+/* =====================================================
+   DASHBOARD SPK INVESTASI SAHAM LQ45
+   ===================================================== */
+
+/* ===========================
+   BODY
+=========================== */
+
+body{
+    background:#f5f7fb;
+    font-family:'Segoe UI',sans-serif;
+}
+
+/* ===========================
+   HEADER
+=========================== */
+
+.dashboard-header{
+    background:#fff;
+    border-radius:18px;
+    padding:25px 30px;
+    box-shadow:0 4px 20px rgba(0,0,0,.05);
+}
+
+.dashboard-header h3{
+    font-weight:700;
+    color:#1f2937;
+}
+
+.dashboard-header p{
+    color:#6b7280;
+    margin-bottom:0;
+}
+
+/* ===========================
+   SUMMARY CARD
+=========================== */
+
+.summary-card{
+
+    background:#fff;
+
+    border-radius:18px;
+
+    padding:22px;
+
+    height:100%;
+
+    position:relative;
+
+    overflow:hidden;
+
+    transition:.3s;
+
+    box-shadow:0 4px 18px rgba(0,0,0,.06);
+
+}
+
+.summary-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:0 10px 28px rgba(0,0,0,.12);
+
+}
+
+.summary-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:6px;
+
+    top:0;
+
+    left:0;
+
+    bottom:0;
+
+}
+
+/* warna */
+
+.primary-card::before{
+
+    background:#2563eb;
+
+}
+
+.success-card::before{
+
+    background:#16a34a;
+
+}
+
+.warning-card::before{
+
+    background:#f59e0b;
+
+}
+
+.danger-card::before{
+
+    background:#ef4444;
+
+}
+
+.summary-title{
+
+    font-size:13px;
+
+    color:#6b7280;
+
+    margin-bottom:10px;
+
+}
+
+.summary-value{
+
+    font-size:34px;
+
+    font-weight:700;
+
+    color:#111827;
+
+}
+
+.summary-sub{
+
+    color:#9ca3af;
+
+    font-size:13px;
+
+}
+
+.summary-icon{
+
+    position:absolute;
+
+    right:20px;
+
+    top:20px;
+
+    width:60px;
+
+    height:60px;
+
+    border-radius:15px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:28px;
+
+    color:white;
+
+}
+
+.bg-blue{
+
+    background:#3b82f6;
+
+}
+
+.bg-green{
+
+    background:#10b981;
+
+}
+
+.bg-orange{
+
+    background:#f59e0b;
+
+}
+
+.bg-red{
+
+    background:#ef4444;
+
+}
+
+/* ===========================
+   PANEL
+=========================== */
+
+.dashboard-panel{
+
+    border:none;
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+    box-shadow:0 4px 20px rgba(0,0,0,.06);
+
+}
+
+.dashboard-panel .card-header{
+
+    background:#fff;
+
+    padding:18px 22px;
+
+    font-weight:600;
+
+    border-bottom:1px solid #ececec;
+
+}
+
+.dashboard-panel .card-body{
+
+    padding:22px;
+
+}
+
+/* ===========================
+   TABLE
+=========================== */
+
+.table{
+
+    margin-bottom:0;
+
+}
+
+.table thead{
+
+    background:#f9fafb;
+
+}
+
+.table th{
+
+    font-size:14px;
+
+    color:#6b7280;
+
+    border:none;
+
+}
+
+.table td{
+
+    vertical-align:middle;
+
+    border-color:#f1f5f9;
+
+}
+
+.table tbody tr:hover{
+
+    background:#f9fbff;
+
+}
+
+/* ===========================
+   BADGE
+=========================== */
+
+.badge{
+
+    font-size:12px;
+
+    padding:7px 10px;
+
+    border-radius:20px;
+
+}
+
+/* ===========================
+   REKOMENDASI
+=========================== */
+
+.recommend-card{
+
+    background:linear-gradient(135deg,#2563eb,#1e40af);
+
+    color:white;
+
+    border-radius:20px;
+
+    padding:30px;
+
+}
+
+.recommend-code{
+
+    font-size:40px;
+
+    font-weight:700;
+
+}
+
+.recommend-score{
+
+    font-size:28px;
+
+    font-weight:700;
+
+}
+
+.recommend-item{
+
+    margin-top:15px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+}
+
+/* ===========================
+   NEWS
+=========================== */
+
+.news-item{
+
+    display:flex;
+
+    gap:15px;
+
+    padding:15px;
+
+    border-radius:15px;
+
+    transition:.25s;
+
+    margin-bottom:12px;
+
+}
+
+.news-item:hover{
+
+    background:#f8fafc;
+
+}
+
+.news-icon{
+
+    width:50px;
+
+    height:50px;
+
+    border-radius:12px;
+
+    background:#dbeafe;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    color:#2563eb;
+
+    font-size:20px;
+
+}
+
+.news-title{
+
+    font-weight:600;
+
+    color:#111827;
+
+}
+
+.news-date{
+
+    color:#9ca3af;
+
+    font-size:13px;
+
+}
+
+/* ===========================
+   AI INSIGHT
+=========================== */
+
+.ai-insight{
+
+    background:linear-gradient(135deg,#eff6ff,#ffffff);
+
+    border-left:5px solid #2563eb;
+
+    border-radius:16px;
+
+    padding:25px;
+
+    line-height:1.8;
+
+    color:#374151;
+
+}
+
+/* ===========================
+   QUICK MENU
+=========================== */
+
+.quick-menu{
+
+    display:block;
+
+    background:white;
+
+    text-align:center;
+
+    padding:25px;
+
+    border-radius:18px;
+
+    color:#374151;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+    transition:.3s;
+
+    box-shadow:0 4px 16px rgba(0,0,0,.05);
+
+}
+
+.quick-menu:hover{
+
+    background:#2563eb;
+
+    color:white;
+
+    transform:translateY(-4px);
+
+}
+
+/* ===========================
+   CHART
+=========================== */
+
+#ihsg_chart,
+#lq45_chart,
+#pie_fuzzy,
+#sentiment_chart,
+#horizon_chart{
+
+    min-height:330px;
+
+}
+
+/* ===========================
+   BUTTON
+=========================== */
+
+.btn-primary{
+
+    background:#2563eb;
+
+    border:none;
+
+    border-radius:10px;
+
+}
+
+.btn-primary:hover{
+
+    background:#1d4ed8;
+
+}
+
+/* ===========================
+   ANIMATION
+=========================== */
+
+.dashboard-panel,
+
+.summary-card{
+
+    animation:fadeUp .6s ease;
+
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(20px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media(max-width:992px){
+
+.summary-value{
+
+    font-size:28px;
+
+}
+
+.summary-icon{
+
+    width:52px;
+
+    height:52px;
+
+    font-size:22px;
+
+}
+
+.dashboard-header{
+
+    padding:20px;
+
+}
+
+}
+
+@media(max-width:768px){
+
+.dashboard-header{
+
+    text-align:center;
+
+}
+
+.dashboard-panel .card-body{
+
+    padding:18px;
+
+}
+
+.summary-card{
+
+    padding:18px;
+
+}
+
+.recommend-code{
+
+    font-size:30px;
+
+}
+
+.recommend-score{
+
+    font-size:22px;
+
+}
+
+.quick-menu{
+
+    padding:18px;
+
+}
+
+}

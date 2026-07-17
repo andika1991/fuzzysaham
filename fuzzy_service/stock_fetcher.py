@@ -202,24 +202,61 @@ def fetch_and_save_stock_data(mode="daily", years=5):
             print("⚠️ Data kosong")
             continue
 
-        # Handle MultiIndex
+        # =========================================================
+        # HANDLE MULTI INDEX
+        # =========================================================
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
 
-        df = df.rename(columns={"Close": "close_price", "Volume": "volume"})
+        df = df.rename(columns={
+            "Close": "close_price",
+            "Volume": "volume"
+        })
+
         df.reset_index(inplace=True)
         df.rename(columns={"Date": "date"}, inplace=True)
 
-        # =========================
-        # MODE DAILY
-        # =========================
-        if mode == "daily":
+        # =========================================================
+        # HITUNG INDIKATOR TEKNIKAL
+        # =========================================================
+        if mode == "full":
+
+            # Hitung seluruh indikator dari data historis
+            df["ma50"] = (
+                df["close_price"]
+                .rolling(window=50, min_periods=50)
+                .mean()
+            )
+
+            df["ma200"] = (
+                df["close_price"]
+                .rolling(window=200, min_periods=200)
+                .mean()
+            )
+
+            df["volma200"] = (
+                df["volume"]
+                .rolling(window=200, min_periods=200)
+                .mean()
+            )
+
+            df["rsi"] = compute_rsi(df["close_price"])
+
+        else:
+
+            # Daily hanya ambil data terakhir
             df = df.sort_values("date").tail(1)
 
-        # =========================
-        # FUNDAMENTAL (ambil sekali)
-        # =========================
+            df["ma50"] = None
+            df["ma200"] = None
+            df["volma200"] = None
+            df["rsi"] = None
+
+        # =========================================================
+        # FUNDAMENTAL
+        # =========================================================
         try:
+
             ticker_obj = yf.Ticker(yf_ticker)
             info = ticker_obj.info
 
@@ -230,37 +267,57 @@ def fetch_and_save_stock_data(mode="daily", years=5):
             fcf = get_fcf(yf_ticker)
 
         except Exception as e:
+
             print("⚠️ Fundamental error:", e)
-            eps = per = roe = der = fcf = None
+
+            eps = None
+            per = None
+            roe = None
+            der = None
+            fcf = None
 
         df = df.replace({np.nan: None})
 
+        # =========================================================
+        # BUILD ROWS
+        # =========================================================
         rows = []
 
         for _, r in df.iterrows():
+
             rows.append((
+
                 pd.to_datetime(r["date"]).date(),
-                r["close_price"],
+
+                float(r["close_price"]) if r["close_price"] is not None else None,
+
                 eps,
                 per,
                 roe,
                 der,
                 fcf,
-                None,   # ma50 (akan dihitung dari DB)
-                None,   # ma200
+
+                None if pd.isna(r["ma50"]) else float(r["ma50"]),
+                None if pd.isna(r["ma200"]) else float(r["ma200"]),
+
                 int(r["volume"]) if r["volume"] is not None else None,
-                None,   # volma200
-                None,   # rsi
-                None,   # sentimen
+
+                None if pd.isna(r["volma200"]) else float(r["volma200"]),
+
+                None if pd.isna(r["rsi"]) else float(r["rsi"]),
+
+                None,
+
                 id_stock
             ))
 
+        # =========================================================
+        # INSERT DATABASE
+        # =========================================================
         insert_stock_data(rows)
 
-        # 🔥 HITUNG TEKNIKAL DARI DATABASE (khusus daily)
+        # Daily baru dihitung dari database
         if mode == "daily":
             update_technical_indicators(id_stock)
 
         time.sleep(1)
-
-    return {"status": "done", "mode": mode}

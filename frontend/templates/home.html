@@ -255,6 +255,39 @@
     font-size: 15px;
   }
 
+  .hero-image-wrap img{
+    cursor: zoom-in;
+    transition: .3s;
+}
+
+.hero-image-wrap img:hover{
+    transform: scale(1.02);
+}
+
+/* Preview */
+#previewModal .modal-dialog{
+    max-width:95vw;
+}
+
+#previewModal .modal-content{
+    background:#111;
+    border:none;
+}
+
+#previewModal .modal-body{
+    overflow:hidden;
+    height:80vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+#previewImage{
+    max-width:100%;
+    max-height:100%;
+    cursor:grab;
+}
+
   @keyframes floatIcon {
     0% {
       transform: translateY(0);
@@ -341,9 +374,20 @@
 </style>
 
 <section class="home-hero">
+     
   <div class="container">
     <div class="row align-items-center g-5">
       <div class="col-lg-6">
+               {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
         <div class="hero-kicker">
           <span></span>
           Sistem Pendukung Keputusan Investasi
@@ -576,11 +620,83 @@
               </div>
             </div>
           </div>
+<div class="accordion-item">
+    <h2 class="accordion-header" id="faqHeadingSix">
+        <button class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#faqSix"
+                aria-expanded="false"
+                aria-controls="faqSix">
 
+            Bagaimana alur proses analisis pada FuzzyInvest?
+
+        </button>
+    </h2>
+
+    <div id="faqSix"
+         class="accordion-collapse collapse"
+         aria-labelledby="faqHeadingSix"
+         data-bs-parent="#faqAccordion">
+
+        <div class="accordion-body text-center">
+
+            <p class="mb-3">
+                Berikut merupakan diagram alur proses analisis yang digunakan
+                pada sistem FuzzyInvest.
+            </p>
+
+            <img src="{{ url_for('static', filename='img/alur_sistem.png') }}"
+                 class="img-fluid rounded shadow preview-image"
+                 alt="Alur Sistem"
+                 data-bs-toggle="modal"
+                 data-bs-target="#imageModal"
+                 style="cursor:pointer;max-height:450px;">
+
+            <small class="text-muted d-block mt-2">
+                Klik gambar untuk memperbesar.
+            </small>
+
+        </div>
+
+    </div>
+</div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark border-0">
+
+            <div class="modal-header border-0">
+                <h6 class="text-white mb-0">Preview Gambar</h6>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body text-center">
+                <img id="modalImage"
+                     src=""
+                     class="img-fluid rounded"
+                     alt="">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll(".preview-image").forEach(img => {
+    img.addEventListener("click", function () {
+        document.getElementById("modalImage").src = this.src;
+    });
+});
+</script>
 
 {% endblock %}

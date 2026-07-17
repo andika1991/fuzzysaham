@@ -1,4 +1,5 @@
 from db import get_db
+import pandas as pd
 
 class StockModel:
 
@@ -107,3 +108,86 @@ class StockModel:
 
         cursor.close()
         conn.close()
+
+    @staticmethod
+    def get_stock_performance(id_stock):
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT
+                date,
+                close_price
+            FROM stock_data
+            WHERE id_stock=%s
+            ORDER BY date DESC
+        """, (id_stock,))
+
+        rows = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        if not rows:
+            return {}
+
+        df = pd.DataFrame(rows)
+
+        df["date"] = pd.to_datetime(df["date"])
+
+        latest_price = df.iloc[0]["close_price"]
+        latest_date = df.iloc[0]["date"]
+
+        def calc_by_offset(offset):
+            if len(df) <= offset:
+                return None
+
+            old_price = df.iloc[offset]["close_price"]
+
+            return round(
+                ((latest_price - old_price) / old_price) * 100,
+                2
+            )
+
+        performance = {
+            "week": calc_by_offset(5),
+            "month": calc_by_offset(21),
+            "quarter": calc_by_offset(63),
+            "half": calc_by_offset(126),
+            "ytd": None,
+            "three_year": None
+        }
+
+        # ===========================
+        # YTD
+        # ===========================
+        current_year = latest_date.year
+
+        ytd = df[df["date"].dt.year == current_year]
+
+        if len(ytd):
+
+            first_price = ytd.iloc[-1]["close_price"]
+
+            performance["ytd"] = round(
+                ((latest_price - first_price) / first_price) * 100,
+                2
+            )
+
+        # ===========================
+        # 3 Tahun
+        # ===========================
+        target_date = latest_date - pd.DateOffset(years=3)
+
+        old = df[df["date"] <= target_date]
+
+        if len(old):
+
+            price = old.iloc[0]["close_price"]
+
+            performance["three_year"] = round(
+                ((latest_price - price) / price) * 100,
+                2
+            )
+
+        return performance
