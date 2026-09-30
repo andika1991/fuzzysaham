@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from models.stock import StockModel
+from models.dashboard_admin import DashboardAdm
 
 
 admin_stock = Blueprint('admin_stock', __name__, url_prefix='/admin/stock')
@@ -8,7 +9,9 @@ admin_stock = Blueprint('admin_stock', __name__, url_prefix='/admin/stock')
 @admin_stock.route('/')
 def index():
     stocks = StockModel.get_all()
-    return render_template('admin/stock/index.html', stocks=stocks)
+    rule_count = DashboardAdm.get_rule_count()
+
+    return render_template('admin/stock/index.html', stocks=stocks, rule_count=rule_count)
 
 
 @admin_stock.route('/create', methods=['GET', 'POST'])

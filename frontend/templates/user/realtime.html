@@ -1,0 +1,2614 @@
+{% extends 'user/layout/base.html' %}
+{% block title %}Realtime LQ45 - FuzzyInvest{% endblock %}
+
+{% block content %}
+
+<style>
+body {
+    background:
+    linear-gradient(rgba(255,255,255,0.82), rgba(255,255,255,0.82)),
+    url("https://img.jakpost.net/c/2026/04/17/2026_04_17_174816_1776411922._large.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+.realtime-page {
+    padding: 24px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 25px;
+    margin-bottom: 22px;
+    padding: 20px;
+    background: linear-gradient(135deg, #ffffff, #f8fbff);
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.brand-area {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.idx-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.idx-mark {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #e31e24;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.idx-name {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.4;
+}
+
+.idx-name strong {
+    font-size: 13px;
+    color: #172033;
+}
+
+.idx-name span {
+    font-size: 10px;
+    color: #6b7280;
+}
+
+.header-divider {
+    width: 1px;
+    height: 55px;
+    background: #e5e7eb;
+}
+
+.title-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #172033;
+}
+
+.page-title span {
+    color: #2563eb;
+}
+
+.page-subtitle {
+    margin-top: 5px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.header-features {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.header-features span {
+    font-size: 11px;
+    color: #4b5563;
+}
+
+.live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 9px;
+    border-radius: 5px;
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #16a34a;
+}
+
+.data-source-area {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 250px;
+}
+
+.source-card,
+.update-card {
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 7px;
+    padding: 10px 13px;
+}
+
+.source-label {
+    color: #6b7280;
+    font-size: 10px;
+    margin-bottom: 2px;
+}
+
+.yahoo-wordmark {
+    color: #6001d2;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.yahoo-wordmark span {
+    font-weight: 500;
+}
+
+.source-note {
+    color: #9ca3af;
+    font-size: 9px;
+    margin-top: 2px;
+}
+
+.update-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.update-icon {
+    font-size: 20px;
+    color: #2563eb;
+}
+
+.update-card strong {
+    display: block;
+    font-size: 11px;
+    color: #374151;
+}
+
+.update-card span {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+    color: #9ca3af;
+}
+
+
+/* =========================================================
+   REKOMENDASI 3 KOTAK
+========================================================= */
+
+.recommendation-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.recommendation-box {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 150px;
+}
+
+.potential-box {
+    border-top: 3px solid #16a34a;
+}
+
+.neutral-box {
+    border-top: 3px solid #9ca3af;
+}
+
+.not-potential-box {
+    border-top: 3px solid #dc2626;
+}
+
+.recommendation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.recommendation-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #172033;
+}
+
+.recommendation-subtitle {
+    margin-top: 3px;
+    font-size: 10px;
+    color: #6b7280;
+}
+
+.recommendation-count {
+    min-width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: #f3f4f6;
+    color: #374151;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.stock-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.stock-item {
+    padding: 7px 5px;
+    border: 1px solid #edf0f3;
+    border-radius: 5px;
+    background: #f8fafc;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.potential-box .stock-item {
+    color: #15803d;
+}
+
+.neutral-box .stock-item {
+    color: #4b5563;
+}
+
+.not-potential-box .stock-item {
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   CARD REKOMENDASI + FILTER
+========================================================= */
+
+.recommendation-stock {
+    background: #ffffff;
+    border: 1px solid #e8edf3;
+    border-radius: 7px;
+    padding: 9px;
+    min-width: 0;
+}
+
+.recommendation-stock-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+}
+
+.recommendation-stock-code {
+    font-size: 12px;
+    font-weight: 800;
+    color: #1d4ed8;
+}
+
+.recommendation-stock-price {
+    margin-top: 5px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #172033;
+}
+
+.recommendation-stock-change {
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.recommendation-stock-chart {
+    margin: 6px -2px 4px;
+    height: 38px;
+}
+
+.recommendation-stock-chart svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.recommendation-stock-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+}
+
+.detail-btn {
+    border: 1px solid #2563eb;
+    background: white;
+    color: #2563eb;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.detail-btn:hover {
+    background: #eff6ff;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.badge-positive,
+.badge-potential {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.badge-negative,
+.badge-not-potential {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.badge-neutral {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.positive {
+    color: #15803d;
+}
+
+.negative {
+    color: #dc2626;
+}
+
+.neutral {
+    color: #6b7280;
+}
+
+.monitoring-section {
+    margin-top: 22px;
+}
+
+.monitoring-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 15px;
+    margin-bottom: 12px;
+}
+
+.monitoring-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #172033;
+}
+
+.monitoring-description {
+    margin-top: 3px;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.filter-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 13px;
+    margin-bottom: 14px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-row input,
+.filter-row select {
+    height: 38px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 0 12px;
+    font-size: 13px;
+    background: white;
+}
+
+.search-input {
+    flex: 1;
+}
+
+.filter-select {
+    width: 180px;
+}
+
+.btn-refresh {
+    height: 38px;
+    padding: 0 15px;
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-refresh:hover {
+    background: #1d4ed8;
+}
+
+.monitoring-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.market-card {
+    background: #ffffff;
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    padding: 12px;
+    transition: .2s;
+}
+
+.market-card:hover {
+    border-color: #bfdbfe;
+    box-shadow: 0 5px 14px rgba(0,0,0,.05);
+}
+
+.market-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.market-ticker {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1d4ed8;
+}
+
+.market-company {
+    margin-top: 2px;
+    font-size: 10px;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.market-price {
+    margin-top: 13px;
+    font-size: 19px;
+    font-weight: 700;
+    color: #172033;
+}
+
+.market-change {
+    margin-top: 3px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.market-chart {
+    height: 180px;
+    margin: 12px 0;
+    overflow: hidden;
+    border: 1px solid #edf0f3;
+    border-radius: 7px;
+    background: #fff;
+}
+
+.market-chart iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
+.company-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    border-radius: 5px;
+    border: 1px solid #edf0f3;
+    background: #fff;
+    flex: 0 0 28px;
+}
+
+.stock-identity {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    padding: 8px 9px;
+    flex: 1;
+}
+
+.stock-identity .market-ticker {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1e40af;
+    line-height: 1.1;
+}
+
+.stock-identity .market-company {
+    margin-top: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #334155;
+    line-height: 1.3;
+}
+
+.market-price-row {
+    margin-top: 10px;
+}
+
+.market-change {
+    display: none;
+}
+
+.market-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 13px;
+}
+
+.market-detail-btn {
+    border: none;
+    background: transparent;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.empty-market {
+    grid-column: 1 / -1;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 35px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+
+
+/* =========================================================
+   DETAIL
+========================================================= */
+
+.detail-panel {
+    margin-top: 22px;
+    background: #ffffff;
+    border: 1px solid #d9dee7;
+    border-radius: 10px;
+    display: none;
+    overflow: hidden;
+}
+
+.detail-panel.active {
+    display: block;
+}
+
+.detail-header {
+    padding: 20px 24px;
+    background: #f8fafc;
+    border-bottom: 1px solid #d9dee7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-ticker {
+    font-size: 26px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.detail-company {
+    color: #475569;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.detail-close {
+    border: none;
+    background: #e5e7eb;
+    color: #374151;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.detail-close:hover {
+    background: #d1d5db;
+    color: #111827;
+}
+
+.detail-content {
+    padding: 20px;
+    background: #ffffff;
+}
+
+.result-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.result-box {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+    background: #ffffff;
+}
+
+.result-label {
+    color: #64748b;
+    font-size: 11px;
+    margin-bottom: 5px;
+}
+
+.result-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 24px 0 12px;
+}
+
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.data-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+    padding: 11px;
+}
+
+.data-label {
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.data-value {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1e293b;
+}
+
+/* =========================================================
+   MEMBERSHIP
+========================================================= */
+
+.membership-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.membership-table th {
+    background: #f8fafc;
+    text-align: left;
+    padding: 10px;
+    color: #4b5563;
+}
+
+.membership-table td {
+    padding: 10px;
+    border-bottom: 1px solid #edf0f3;
+}
+
+.membership-value {
+    font-weight: 600;
+}
+
+
+
+.inference-box {
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    padding: 15px;
+    background: #fafafa;
+}
+
+.inference-row {
+    margin-bottom: 10px;
+}
+
+.inference-row:last-child {
+    margin-bottom: 0;
+}
+
+.inference-label {
+    font-size: 11px;
+    color: #6b7280;
+    margin-bottom: 3px;
+}
+
+.inference-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #172033;
+}
+
+
+.insight-box {
+    background: #f8fbff;
+    border: 1px solid #dbeafe;
+    border-radius: 7px;
+    padding: 17px;
+    color: #374151;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+   
+
+.data-attribution {
+    margin-top: 18px;
+    padding: 13px 0;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: #9ca3af;
+    font-size: 10px;
+}
+
+
+
+@media (max-width: 1000px) {
+
+    .page-header {
+        flex-direction: column;
+    }
+
+    .data-source-area {
+        width: 100%;
+    }
+
+    .recommendation-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .result-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .data-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .monitoring-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+
+    .realtime-page {
+        padding: 12px;
+    }
+
+    .brand-area {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-divider {
+        display: none;
+    }
+
+    .filter-row {
+        flex-direction: column;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    .result-grid,
+    .data-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .monitoring-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .stock-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .monitoring-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .data-attribution {
+        flex-direction: column;
+    }
+}
+
+
+.recommendation-info {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin: 12px 0;
+    padding: 9px 0;
+    border-top: 1px solid #eef2f7;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.recommendation-info-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.info-label {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.horizon-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.score-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+
+.market-session-info {
+    margin-top: 20px;
+    padding: 18px 20px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.market-session-info > strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.market-session-info p {
+    margin: 6px 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #64748b;
+}
+
+.market-session-info p strong {
+    color: #334155;
+    font-weight: 600;
+}
+
+/* Tampilan desktop */
+@media (min-width: 768px) {
+    .market-session-info {
+        padding: 20px 24px;
+    }
+
+    .market-session-info p {
+        font-size: 13px;
+    }
+}
+
+/* Tampilan mobile */
+@media (max-width: 767px) {
+    .market-session-info {
+        margin-top: 15px;
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    .market-session-info > strong {
+        font-size: 14px;
+    }
+
+    .market-session-info p {
+        font-size: 12px;
+        line-height: 1.55;
+    }
+}
+
+@media (max-width: 500px) {
+
+    .result-grid,
+    .data-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stock-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.detail-chart-wrap {
+    margin-bottom: 18px;
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.detail-chart-title {
+    padding: 10px 12px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 12px;
+    font-weight: 700;
+    border-bottom: 1px solid #dbeafe;
+}
+
+.detail-chart-frame {
+    height: 360px;
+}
+
+.ai-result-box {
+    background: #f8fafc;
+    border: 1px solid #dbe3ef;
+    border-left: 4px solid #2563eb;
+    border-radius: 9px;
+    padding: 14px 16px;
+    color: #334155;
+    line-height: 1.65;
+    font-size: 13px;
+    white-space: pre-line;
+}
+
+.detail-header-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.detail-logo {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    border: 1px solid #dbe3ef;
+    border-radius: 7px;
+    background: #fff;
+}
+
+
+.recommendation-stock-head .stock-identity {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    padding: 7px 8px;
+}
+
+.recommendation-stock-code {
+    color: #1e40af;
+    font-weight: 800;
+    font-size: 13px;
+}
+
+.recommendation-stock-company {
+    color: #334155;
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: 2px;
+    line-height: 1.25;
+}
+
+</style>
+
+
+<div class="realtime-page">
+
+    <div class="page-header">
+
+        <!-- BRAND IDX -->
+        <div class="brand-area">
+
+    
+            <div>
+
+                <div class="title-line">
+
+                    <h1 class="page-title">
+                        Realtime <span>LQ45</span>
+                    </h1>
+
+                    <div class="live-badge">
+                        <span class="live-dot"></span>
+                        DELAY 15 MENIT
+                    </div>
+
+                </div>
+
+                <div class="page-subtitle">
+                    Pantau saham LQ45 dengan data pasar tertunda
+                    sekitar 15 menit, dilengkapi analisis
+                    Fuzzy Mamdani dan Insight AI.
+                </div>
+
+                <div class="header-features">
+                    <span>✓ Data Pasar</span>
+                    <span>✓ Analisis Fuzzy</span>
+                    <span>✓ Insight AI</span>
+                    <span>✓ Update Berkala</span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- DATA SOURCE -->
+        <div class="data-source-area">
+
+            <!-- YAHOO FINANCE -->
+            <div class="source-card">
+
+                <div class="source-label">
+                    Data by
+                </div>
+
+                <div class="yahoo-wordmark">
+                    yahoo!<span>finance</span>
+                </div>
+
+                <div class="source-note">
+                    Sumber data pasar saham
+                </div>
+
+            </div>
+
+
+            <!-- UPDATE INFORMATION -->
+            <div class="update-card">
+
+                <div class="update-icon">
+                    ↻
+                </div>
+
+                <div>
+
+                
+                    <div class="update-info">
+                        Update terakhir:
+                        <strong>
+                            {{ realtime_data[0].snapshot_at }} +7
+                        </strong>
+                    </div>
+
+                
+
+                </div>
+
+            </div>
+
+        </div>
+        
+
+    </div>
+    <div class="market-session-info">
+    <strong>Periode Pemantauan Data</strong>
+
+    <p>
+        Sistem mulai memproses data pada pukul <strong>09.30 WIB</strong>
+        hingga penutupan perdagangan. Pembaruan dilakukan setiap
+        ±17 menit.
+    </p>
+
+    <p>
+        Selama jeda perdagangan siang, pembaruan dihentikan sementara
+        dan dilanjutkan kembali pada sesi perdagangan berikutnya.
+    </p>
+
+    <p>
+        <strong>Catatan:</strong> Data pasar diupdate setiap 17 menit sekali.
+    </p>
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     REKOMENDASI
+====================================================== -->
+
+<div class="recommendation-grid">
+
+    <div class="recommendation-box potential-box">
+        <div class="recommendation-header">
+            <div>
+                <div class="recommendation-title">
+                    Rekomendasi Saham Potensial Hari Ini
+                </div>
+                <div class="recommendation-subtitle">
+        Rekomendasi saham potensial berdasarkan analisis hari ini
+                </div>
+            </div>
+            <span
+                class="recommendation-count"
+                id="potentialCount"
+            >
+            0
+            </span>
+        </div>
+        <div
+            class="stock-list"
+            id="potentialList"
+        >
+            -
+        </div>
+    </div>
+
+    <div class="recommendation-box neutral-box">
+        <div class="recommendation-header">
+            <div>
+                <div class="recommendation-title">
+                    Netral
+                </div>
+                <div class="recommendation-subtitle">
+        Wait and see, tunggu perkembangan kondisi saham sebelum mengambil keputusan
+                </div>
+            </div>
+            <span
+                class="recommendation-count"
+                id="neutralCount"
+            >
+                0
+            </span>
+        </div>
+        <div
+            class="stock-list"
+            id="neutralList"
+        >
+            -
+        </div>
+    </div>
+
+    <div class="recommendation-box not-potential-box">
+        <div class="recommendation-header">
+            <div>
+                <div class="recommendation-title">
+                    Tidak Potensial
+                </div>
+                <div class="recommendation-subtitle">
+        Saham yang belum menunjukkan kondisi yang mendukung berdasarkan analisis hari ini, Hindari terlebih dahulu
+                </div>
+            </div>
+            <span
+                class="recommendation-count"
+                id="notPotentialCount"
+            >
+                0
+            </span>
+        </div>
+        <div
+            class="stock-list"
+            id="notPotentialList"
+        >
+            -
+        </div>
+    </div>
+</div>
+
+
+<!-- =====================================================
+     MONITORING CARD
+====================================================== -->
+
+<div class="monitoring-section">
+
+    <div class="monitoring-header">
+        <div>
+            <div class="monitoring-title">
+                Pergerakan Saham LQ45
+            </div>
+            <div class="monitoring-description">
+                Harga terbaru, perubahan dari harga pembukaan, grafik pergerakan,
+                dan hasil rekomendasi Fuzzy Mamdani.
+            </div>
+        </div>
+    </div>
+
+    <div class="filter-card">
+        <div class="filter-row">
+
+            <input
+                id="searchStock"
+                class="search-input"
+                type="text"
+                placeholder="Cari ticker atau nama saham..."
+            >
+
+            <select
+                id="filterCategory"
+                class="filter-select"
+            >
+                <option value="">Semua Kategori</option>
+                <option value="Potensial">Potensial</option>
+                <option value="Netral">Netral</option>
+                <option value="Tidak Potensial">Tidak Potensial</option>
+            </select>
+
+            <select
+                id="filterSentiment"
+                class="filter-select"
+            >
+                <option value="">Semua Sentimen</option>
+                <option value="positif">Positif</option>
+                <option value="netral">Netral</option>
+                <option value="negatif">Negatif</option>
+            </select>
+
+            <button
+                class="btn-refresh"
+                id="refreshButton"
+            >
+                Refresh
+            </button>
+
+        </div>
+    </div>
+
+    <div
+        class="monitoring-grid"
+        id="movementGrid"
+    >
+        <div class="empty-market">
+            Memuat data realtime...
+        </div>
+    </div>
+
+</div>
+
+<!-- =====================================================
+     DETAIL SAHAM
+====================================================== -->
+
+<div
+    class="detail-panel"
+    id="detailPanel"
+>
+
+    <div class="detail-header">
+
+        <div class="detail-header-main">
+
+            <img
+                class="detail-logo"
+                id="detailLogo"
+                src=""
+                alt="Logo perusahaan"
+            >
+
+            <div>
+
+            <div
+                class="detail-ticker"
+                id="detailTicker"
+            >
+                -
+            </div>
+
+            <div
+                class="detail-company"
+                id="detailCompany"
+            >
+                -
+            </div>
+
+            <div
+                class="detail-company"
+                id="detailSector"
+            >
+                -
+            </div>
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="detail-close"
+            onclick="closeDetail()"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="detail-content">
+        <div class="detail-chart-wrap">
+            <div class="detail-chart-title">Pergerakan Harga</div>
+            <div class="detail-chart-frame" id="detailTradingView"></div>
+        </div>
+
+        <div class="result-grid">
+            <div class="result-box">
+                <div class="result-label">
+                    Fuzzy Score
+                </div>
+                <div
+                    class="result-value"
+                    id="detailScore"
+                >
+                    -
+                </div>
+            </div>
+
+
+            <div class="result-box">
+                <div class="result-label">
+                    Kategori
+                </div>
+                <div
+                    class="result-value"
+                    id="detailCategory"
+                >
+                    -
+                </div>
+            </div>
+
+
+            <div class="result-box">
+                <div class="result-label">
+                    Horizon
+                </div>
+                <div
+                    class="result-value"
+                    id="detailHorizon"
+                >
+                    -
+                </div>
+            </div>
+
+
+            <div class="result-box">
+                <div class="result-label">
+                    Sentimen
+                </div>
+                <div
+                    class="result-value"
+                    id="detailSentiment"
+                >
+                    -
+                </div>
+            </div>
+        </div>
+
+
+        <!-- FUNDAMENTAL -->
+
+        <div class="section-title">
+            Data Fundamental
+        </div>
+        <div
+            class="data-grid"
+            id="fundamentalData"
+        >
+        </div>
+
+
+        <!-- TEKNIKAL -->
+
+        <div class="section-title">
+            Data Teknikal
+        </div>
+        <div
+            class="data-grid"
+            id="technicalData"
+        >
+        </div>
+
+
+        <!-- FUZZIFIKASI -->
+
+
+        <div class="section-title">
+            Hasil Analisis AI
+        </div>
+
+        <div
+            class="ai-result-box"
+            id="detailInsight"
+        >
+            Insight belum tersedia.
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="data-attribution">
+    <span>
+        <strong>FuzzyInvest</strong>
+        · Monitoring dan analisis saham LQ45
+    </span>
+    <span>
+        Data pasar:
+        <strong>Yahoo Finance</strong>
+        · Snapshot sistem diperbarui setiap
+        <strong>17 menit</strong>
+    </span>
+</div>
+</div>
+
+
+<script>
+let realtimeData = [];
+let filteredData = [];
+function formatNumber(
+    value,
+    decimals = 2
+) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return "-";
+    }
+
+    const number = Number(value);
+
+    if (Number.isNaN(number)) {
+        return "-";
+    }
+
+    return number.toLocaleString(
+        "id-ID",
+        {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        }
+    );
+}
+
+
+function formatScore(value) {
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return "-";
+    }
+
+    const number = Number(value);
+    if (Number.isNaN(number)) {
+        return "-";
+    }
+
+    return number.toFixed(4);
+}
+
+function categoryBadge(value) {
+    if (value === "Potensial") {
+        return `
+            <span class="badge badge-potential">
+                Potensial
+            </span>
+        `;
+
+    }
+    if (value === "Tidak Potensial") {
+        return `
+            <span class="badge badge-not-potential">
+                Tidak Potensial
+            </span>
+        `;
+    }
+    return `
+        <span class="badge badge-neutral">
+            Netral
+        </span>
+    `;
+}
+
+function sentimentBadge(value) {
+    if (value === "positif") {
+        return `
+            <span class="badge badge-positive">
+                Positif
+            </span>
+        `;
+    }
+    if (value === "negatif") {
+        return `
+            <span class="badge badge-negative">
+                Negatif
+            </span>
+        `;
+    }
+
+    return `
+        <span class="badge badge-neutral">
+            Netral
+        </span>
+    `;
+}
+
+
+/* =====================================================
+   LOAD DATA REALTIME
+===================================================== */
+
+function loadRealtimeData() {
+    const grid =
+        document.getElementById("movementGrid");
+    if (grid) {
+        grid.innerHTML = `
+            <div class="empty-market">
+                Memuat data realtime...
+            </div>
+        `;
+    }
+    try {
+        realtimeData =
+            {{ realtime_data | tojson }};
+        if (!Array.isArray(realtimeData)) {
+            realtimeData = [];
+        }
+        filteredData = [...realtimeData];
+        updateSummary();
+        updateLiveInfo();
+        renderMovementCards();
+    } catch (error) {
+        console.error(
+            "[REALTIME ERROR]",
+            error
+        );
+        if (grid) {
+            grid.innerHTML = `
+                <div class="empty-market">
+                    <strong>Gagal mengambil data realtime.</strong>
+                    <br>
+                    <small>${error.message}</small>
+                </div>
+            `;
+        }
+    }
+}
+
+
+function updateSummary() {
+    const potential =
+        realtimeData.filter(
+            item =>
+                item.kategori === "Potensial"
+        );
+
+    const neutral =
+        realtimeData.filter(
+            item =>
+                item.kategori === "Netral"
+        );
+
+    const notPotential =
+        realtimeData.filter(
+            item =>
+                item.kategori === "Tidak Potensial"
+        );
+
+    renderRecommendation(
+        "potentialList",
+        "potentialCount",
+        potential
+    );
+
+    renderRecommendation(
+        "neutralList",
+        "neutralCount",
+        neutral
+    );
+
+    renderRecommendation(
+        "notPotentialList",
+        "notPotentialCount",
+        notPotential
+    );
+}
+
+function renderRecommendation(
+    listId,
+    countId,
+    stocks
+) {
+
+    const countElement = document.getElementById(countId);
+    const listElement = document.getElementById(listId);
+    if (!countElement || !listElement) {
+        return;
+    }
+    countElement.textContent = stocks.length;
+    if (!stocks.length) {
+        listElement.innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;color:#9ca3af;padding:15px;font-size:11px;">
+                Tidak ada saham
+            </div>
+        `;
+        return;
+    }
+    const displayStocks = stocks.slice(0, 4);
+listElement.innerHTML = displayStocks.map(item => {
+    const close = Number(item.close_price);
+    const ticker = String(item.ticker || "").toUpperCase();
+    const horizon = item.horizon || "-";
+    return `
+        <div class="recommendation-stock">
+            <div class="recommendation-stock-info">
+                <div class="recommendation-stock-code">
+                    ${ticker || "-"}
+                </div>
+                <div class="recommendation-stock-price">
+                    Rp ${formatNumber(close, 0)}
+                </div>
+                <div class="recommendation-stock-horizon">
+                    ${horizon}
+                </div>
+            </div>
+            <div class="recommendation-stock-right">
+                ${categoryBadge(item.kategori)}
+                <button
+                    class="detail-btn"
+                    onclick="showDetailById('${item.id_realtime || item.id_stock || item.ticker}')"
+                >
+                    Detail
+                </button>
+            </div>
+        </div>
+    `;
+}).join("");    }
+
+
+
+
+function updateLiveInfo() {
+
+    if (!realtimeData.length) {
+        return;
+    }
+
+
+    const latest =
+        realtimeData
+            .map(
+                item =>
+                    item.snapshot_at
+            )
+            .filter(Boolean)
+            .sort()
+            .pop();
+
+
+    if (!latest) {
+        return;
+    }
+
+
+    const date =
+        new Date(latest);
+
+
+    const timeText =
+        date.toLocaleTimeString(
+            "id-ID",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+
+    const headerUpdate =
+        document.getElementById(
+            "headerUpdateText"
+        );
+
+
+    if (headerUpdate) {
+
+        headerUpdate.textContent =
+            `Terakhir diperbarui ${timeText} WIB`;
+
+    }
+
+}
+
+
+
+
+function createTradingViewChart(item) {
+
+    const ticker = String(item.ticker || "").trim().toUpperCase();
+
+    if (!ticker) {
+        return `<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:11px;">Chart tidak tersedia</div>`;
+    }
+
+    const symbol = encodeURIComponent(`IDX:${ticker}`);
+    const widgetUrl =
+        `https://www.tradingview.com/widgetembed/?frameElementId=tv_${ticker}` +
+        `&symbol=${symbol}` +
+        `&interval=D` +
+        `&hidesidetoolbar=1` +
+        `&symboledit=0` +
+        `&saveimage=0` +
+        `&toolbarbg=f5f7fa` +
+        `&theme=light` +
+        `&style=1` +
+        `&timezone=Asia%2FJakarta` +
+        `&hideideas=1` +
+        `&hidelegend=1`;
+
+    return `
+        <iframe
+            src="${widgetUrl}"
+            title="TradingView ${ticker}"
+            loading="lazy"
+            allowtransparency="true"
+            scrolling="no"
+        ></iframe>
+    `;
+}
+
+
+/* =====================================================
+   MONITORING CARD
+===================================================== */
+
+function renderMovementCards() {
+
+    const container = document.getElementById("movementGrid");
+
+    if (!container) return;
+
+    if (!filteredData.length) {
+        container.innerHTML = `<div class="empty-market">Data saham tidak ditemukan.</div>`;
+        return;
+    }
+
+container.innerHTML = filteredData.map(item => {
+    const close = Number(item.close_price);
+    const ticker = String(item.ticker || "").trim().toUpperCase();
+    const horizon = item.horizon || "-";
+    const fuzzyScore = Number(item.fuzzy_score);
+
+    return `
+        <div class="market-card">
+
+            <div class="market-card-head">
+
+                <div class="stock-identity">
+                    <img
+                        class="company-logo"
+                        src="https://assets.stockbit.com/logos/companies/${ticker}.png"
+                        alt="${ticker}"
+                        loading="lazy"
+                        onerror="this.style.display='none'"
+                    >
+
+                    <div>
+                        <div class="market-ticker">
+                            ${ticker || "-"}
+                        </div>
+
+                        <div class="market-company">
+                            ${item.nama_perusahaan || "-"}
+                        </div>
+                    </div>
+                </div>
+
+                ${categoryBadge(item.kategori)}
+
+            </div>
+
+
+            <div class="recommendation-info">
+
+                <div class="recommendation-info-item">
+                    <span class="info-label">
+                        Horizon
+                    </span>
+
+                    <span class="horizon-value">
+                        ${horizon}
+                    </span>
+                </div>
+
+
+                <div class="recommendation-info-item">
+                    <span class="info-label">
+                        Fuzzy Score
+                    </span>
+
+                    <span class="score-value">
+                        ${
+                            Number.isFinite(fuzzyScore)
+                                ? fuzzyScore.toFixed(4)
+                                : "-"
+                        }
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="market-price">
+                Rp ${formatNumber(close, 0)}
+            </div>
+
+
+            <div class="market-chart">
+                ${createTradingViewChart(item)}
+            </div>
+
+
+            <div class="market-card-footer">
+
+                ${sentimentBadge(item.sentimen)}
+
+                <button
+                    class="market-detail-btn"
+                    onclick="showDetailById('${item.id_realtime || item.id_stock || item.ticker}')"
+                >
+                    Detail →
+                </button>
+
+            </div>
+
+        </div>
+    `;
+}).join("");
+}
+
+function showDetailById(identifier) {
+
+    const item =
+        realtimeData.find(
+            stock =>
+                String(
+                    stock.id_realtime ??
+                    stock.id_stock ??
+                    stock.ticker
+                ) === String(identifier)
+        );
+
+    if (!item) {
+        return;
+    }
+
+    const index =
+        realtimeData.indexOf(item);
+
+    showDetail(index);
+}
+
+
+function applyFilter() {
+
+    const searchElement =
+        document.getElementById(
+            "searchStock"
+        );
+
+    const categoryElement =
+        document.getElementById(
+            "filterCategory"
+        );
+
+    const sentimentElement =
+        document.getElementById(
+            "filterSentiment"
+        );
+
+    const search =
+        searchElement
+            ? searchElement.value
+                .toLowerCase()
+                .trim()
+            : "";
+
+    const category =
+        categoryElement
+            ? categoryElement.value
+            : "";
+
+    const sentiment =
+        sentimentElement
+            ? sentimentElement.value
+            : "";
+
+    filteredData =
+        realtimeData.filter(
+            item => {
+
+                const ticker =
+                    String(
+                        item.ticker || ""
+                    )
+                    .toLowerCase();
+
+                const name =
+                    String(
+                        item.nama_perusahaan ||
+                        ""
+                    )
+                    .toLowerCase();
+
+                const matchSearch =
+                    !search ||
+                    ticker.includes(
+                        search
+                    ) ||
+                    name.includes(
+                        search
+                    );
+
+                const matchCategory =
+                    !category ||
+                    item.kategori ===
+                        category;
+
+                const matchSentiment =
+                    !sentiment ||
+                    item.sentimen ===
+                        sentiment;
+
+                return (
+                    matchSearch &&
+                    matchCategory &&
+                    matchSentiment
+                );
+            }
+        );
+
+    renderMovementCards();
+
+}
+
+function renderDetailTradingView(item) {
+    const container = document.getElementById("detailTradingView");
+    if (!container) return;
+
+    const ticker = String(item.ticker || "").trim().toUpperCase();
+    if (!ticker) {
+        container.innerHTML = `<div style="padding:30px;text-align:center;color:#9ca3af">Chart tidak tersedia</div>`;
+        return;
+    }
+
+    const symbol = encodeURIComponent(`IDX:${ticker}`);
+    const url =
+        `https://www.tradingview.com/widgetembed/?frameElementId=tv_detail_${ticker}` +
+        `&symbol=${symbol}` +
+        `&interval=D&hidesidetoolbar=1&symboledit=0&saveimage=0` +
+        `&toolbarbg=f5f7fa&theme=light&style=1&timezone=Asia%2FJakarta` +
+        `&hideideas=1&hidelegend=1`;
+
+    container.innerHTML = `
+        <iframe
+            src="${url}"
+            title="TradingView ${ticker}"
+            style="width:100%;height:100%;border:0;display:block"
+            loading="lazy"
+            allowtransparency="true"
+            scrolling="no"
+        ></iframe>`;
+}
+
+function showDetail(index) {
+
+    const item =
+        realtimeData[index];
+
+    if (!item) {
+        return;
+    }
+
+    renderDetailTradingView(item);
+
+    const detailLogo = document.getElementById("detailLogo");
+    if (detailLogo) {
+        const tickerValue = String(item.ticker || "").trim().toUpperCase();
+        detailLogo.src = `https://assets.stockbit.com/logos/companies/${tickerValue}.png`;
+        detailLogo.style.display = tickerValue ? "block" : "none";
+        detailLogo.onerror = function () { this.style.display = "none"; };
+    }
+
+    const detailPanel =
+        document.getElementById(
+            "detailPanel"
+        );
+
+    if (detailPanel) {
+
+        detailPanel.classList.add(
+            "active"
+        );
+
+    }
+
+    const ticker =
+        document.getElementById(
+            "detailTicker"
+        );
+
+    if (ticker) {
+        ticker.textContent =
+            item.ticker || "-";
+    }
+
+
+    const company =
+        document.getElementById(
+            "detailCompany"
+        );
+
+    if (company) {
+        company.textContent =
+            item.nama_perusahaan ||
+            "-";
+    }
+
+    const sector =
+        document.getElementById(
+            "detailSector"
+        );
+
+    if (sector) {
+        sector.textContent =
+            `Sektor: ${
+                item.sektor || "-"
+            }`;
+    }
+
+    const score =
+        document.getElementById(
+            "detailScore"
+        );
+
+    if (score) {
+        score.textContent =
+            formatScore(
+                item.fuzzy_score
+            );
+    }
+
+    const category =
+        document.getElementById(
+            "detailCategory"
+        );
+
+    if (category) {
+        category.innerHTML =
+            categoryBadge(
+                item.kategori
+            );
+    }
+
+    const horizon =
+        document.getElementById(
+            "detailHorizon"
+        );
+    if (horizon) {
+        horizon.textContent =
+            item.horizon || "-";
+    }
+
+    const sentiment =
+        document.getElementById(
+            "detailSentiment"
+        );
+
+    if (sentiment) {
+        sentiment.innerHTML =
+            sentimentBadge(
+                item.sentimen
+            );
+    }
+
+    renderFundamental(item);
+    renderTechnical(item);
+    renderMembership(
+        item.membership
+    );
+
+    const ruleId =
+        document.getElementById(
+            "detailRuleId"
+        );
+
+    if (ruleId) {
+        ruleId.textContent =
+            item.rule_id || "-";
+    }
+
+    const ruleCondition =
+        document.getElementById(
+            "detailRuleCondition"
+        );
+
+    if (ruleCondition) {
+        ruleCondition.textContent =
+            item.rule_condition ||
+            "-";
+    }
+    const firing =
+        document.getElementById(
+            "detailFiring"
+        );
+
+    if (firing) {
+        firing.textContent =
+            item.firing_strength !==
+                null &&
+            item.firing_strength !==
+                undefined
+                ? Number(
+                    item.firing_strength
+                ).toFixed(6)
+                : "-";
+    }
+
+    const insight =
+        document.getElementById(
+            "detailInsight"
+        );
+
+    if (insight) {
+        insight.textContent =
+            item.insight ||
+            "Hasil analisis AI belum tersedia.";
+    }
+
+    if (detailPanel) {
+        detailPanel.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+}
+
+function closeDetail() {
+    const panel =
+        document.getElementById(
+            "detailPanel"
+        );
+    if (panel) {
+
+        panel.classList.remove(
+            "active"
+        );
+    }
+}
+   
+
+function renderFundamental(
+    item
+) {
+    const container =
+        document.getElementById(
+            "fundamentalData"
+        );
+    if (!container) {
+        return;
+    }
+
+
+    const data = [
+        ["EPS", item.eps],
+        ["PER", item.per],
+        ["ROE", item.roe],
+        ["DER", item.der],
+        ["FCF", item.fcf]
+
+    ];
+
+
+    container.innerHTML =
+        data
+            .map(
+                ([label, value]) => `
+                    <div class="data-item">
+
+                        <div class="data-label">
+                            ${label}
+                        </div>
+
+                        <div class="data-value">
+                            ${formatNumber(
+                                value
+                            )}
+                        </div>
+
+                    </div>
+                `
+            )
+            .join("");
+
+}
+
+
+/* =====================================================
+   TEKNIKAL
+===================================================== */
+
+function renderTechnical(
+    item
+) {
+
+    const container =
+        document.getElementById(
+            "technicalData"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const data = [
+
+        ["Harga", item.close_price],
+
+        ["Volume", item.volume],
+
+        ["MA50", item.ma50],
+
+        ["MA200", item.ma200],
+
+        ["VolMA200", item.volma200],
+
+        ["RSI", item.rsi],
+
+        ["Gradient", item.gradient]
+
+    ];
+
+
+    container.innerHTML =
+        data
+            .map(
+                ([label, value]) => `
+                    <div class="data-item">
+
+                        <div class="data-label">
+                            ${label}
+                        </div>
+
+                        <div class="data-value">
+                            ${formatNumber(
+                                value
+                            )}
+                        </div>
+
+                    </div>
+                `
+            )
+            .join("");
+
+}
+
+
+/* =====================================================
+   FUZZIFIKASI
+===================================================== */
+
+function renderMembership(
+    membership
+) {
+
+    const container =
+        document.getElementById(
+            "membershipData"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    if (
+        !membership ||
+        typeof membership !==
+            "object"
+    ) {
+
+        container.innerHTML = `
+            <div class="inference-box">
+                Data fuzzifikasi belum tersedia.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    let html = `
+
+        <div class="table-wrapper">
+
+            <table class="membership-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Variabel
+                        </th>
+
+                        <th>
+                            Membership 1
+                        </th>
+
+                        <th>
+                            Membership 2
+                        </th>
+
+                        <th>
+                            Membership 3
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+    `;
+
+
+    Object.entries(
+        membership
+    ).forEach(
+        ([variable, values]) => {
+
+            if (
+                !values ||
+                typeof values !==
+                    "object"
+            ) {
+                return;
+            }
+
+
+            const keys =
+                Object.keys(values);
+
+
+            html += `
+
+                <tr>
+
+                    <td>
+                        <strong>
+                            ${variable}
+                        </strong>
+                    </td>
+            `;
+
+
+            keys.forEach(
+                key => {
+
+                    const value =
+                        Number(
+                            values[key]
+                        );
+
+
+                    html += `
+
+                        <td
+                            class="membership-value"
+                        >
+                            ${
+                                Number.isNaN(
+                                    value
+                                )
+                                    ? "-"
+                                    : value.toFixed(
+                                        6
+                                    )
+                            }
+                        </td>
+
+                    `;
+
+                }
+            );
+
+
+            for (
+                let i = keys.length;
+                i < 3;
+                i++
+            ) {
+
+                html += `
+                    <td>-</td>
+                `;
+
+            }
+
+
+            html += `
+
+                </tr>
+
+            `;
+
+        }
+    );
+
+
+    html += `
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    `;
+
+
+    container.innerHTML =
+        html;
+
+}
+
+
+/* =====================================================
+   EVENT
+===================================================== */
+
+const searchStock =
+    document.getElementById(
+        "searchStock"
+    );
+
+
+if (searchStock) {
+
+    searchStock.addEventListener(
+        "input",
+        applyFilter
+    );
+
+}
+
+
+const filterCategory =
+    document.getElementById(
+        "filterCategory"
+    );
+
+
+if (filterCategory) {
+
+    filterCategory.addEventListener(
+        "change",
+        applyFilter
+    );
+
+}
+
+
+const filterSentiment =
+    document.getElementById(
+        "filterSentiment"
+    );
+
+
+if (filterSentiment) {
+
+    filterSentiment.addEventListener(
+        "change",
+        applyFilter
+    );
+
+}
+
+
+const refreshButton =
+    document.getElementById(
+        "refreshButton"
+    );
+
+
+if (refreshButton) {
+
+    refreshButton.addEventListener(
+        "click",
+        loadRealtimeData
+    );
+
+}
+
+
+/* =====================================================
+   LOAD AWAL
+===================================================== */
+
+loadRealtimeData();
+
+
+/*
+ * Refresh otomatis setiap 17 menit.
+ */
+setInterval(
+    function () {
+
+        window.location.reload();
+
+    },
+    17 * 60 * 1000
+);
+
+</script>
+
+{% endblock %}

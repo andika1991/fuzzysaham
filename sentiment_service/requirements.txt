@@ -5,3 +5,4 @@ scikit-learn
 Sastrawi
 mysql-connector-python
 imbalanced-learn
+python-dotenv

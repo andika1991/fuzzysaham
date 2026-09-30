@@ -1,7 +1,37 @@
 {% extends 'user/layout/base.html' %}
 {% block content %}
 
+<style>
+/* Styling khusus untuk mengecilkan ukuran heading pada pesan chat AI */
+.message.bot .message-bubble h1 { font-size: 1.25rem; margin-top: 0.75rem; margin-bottom: 0.5rem; font-weight: 700; }
+.message.bot .message-bubble h2 { font-size: 1.15rem; margin-top: 0.75rem; margin-bottom: 0.5rem; font-weight: 700; }
+.message.bot .message-bubble h3 { font-size: 1.05rem; margin-top: 0.5rem; margin-bottom: 0.4rem; font-weight: 600; }
+.message.bot .message-bubble h4, 
+.message.bot .message-bubble h5, 
+.message.bot .message-bubble h6 { font-size: 1rem; margin-top: 0.5rem; margin-bottom: 0.25rem; font-weight: 600; }
 
+/* Animation / Indicator Loading Chat */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+}
+.typing-indicator span {
+    width: 6px;
+    height: 6px;
+    background-color: #6c757d;
+    border-radius: 50%;
+    animation: blink 1.4s infinite ease-in-out both;
+}
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes blink {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1.2); }
+}
+</style>
 
 <div class="chat-page">
     <div class="chat-wrapper">
@@ -90,7 +120,7 @@
                            id="user-input"
                            placeholder="Tanyakan tentang saham LQ45..."
                            onkeypress="if(event.key==='Enter') sendMessage()">
-                    <button class="btn-send" onclick="sendMessage()">
+                    <button class="btn-send" id="btn-send" onclick="sendMessage()">
                         <i class="bi bi-send-fill"></i>
                     </button>
                 </div>
@@ -146,13 +176,22 @@
 <script>
 async function sendMessage() {
     const input = document.getElementById("user-input");
+    const sendBtn = document.getElementById("btn-send");
     const message = input.value.trim();
     const convoInput = document.getElementById("conversation-id");
 
     if (!message) return;
 
+    // Tampilkan pesan user & kosongkan input
     addMessage("user", message);
     input.value = "";
+    
+    // Disable input sementara saat memproses
+    input.disabled = true;
+    sendBtn.disabled = true;
+
+    // Tampilkan animasi loading chat
+    const loadingId = showLoading();
 
     try {
         const response = await fetch("/user/chat", {
@@ -165,12 +204,50 @@ async function sendMessage() {
         });
 
         const data = await response.json();
+        
+        // Hapus elemen loading lalu tampilkan respon bot
+        removeLoading(loadingId);
         addMessage("bot", data.reply);
+        
         convoInput.value = data.conversation_id;
         window.history.replaceState(null, "", "/user/konsultasi/" + data.conversation_id);
 
     } catch (error) {
+        removeLoading(loadingId);
         addMessage("bot", "Maaf, terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+        input.disabled = false;
+        sendBtn.disabled = false;
+        input.focus();
+    }
+}
+
+function showLoading() {
+    const chatBox = document.getElementById("chat-box");
+    const loadingDiv = document.createElement("div");
+    const loadingId = "loading-" + Date.now();
+    
+    loadingDiv.className = "message bot";
+    loadingDiv.id = loadingId;
+    loadingDiv.innerHTML = `
+        <div class="message-bubble">
+            <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    `;
+
+    chatBox.appendChild(loadingDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    return loadingId;
+}
+
+function removeLoading(loadingId) {
+    const loadingDiv = document.getElementById(loadingId);
+    if (loadingDiv) {
+        loadingDiv.remove();
     }
 }
 

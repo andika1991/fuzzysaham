@@ -570,6 +570,13 @@
                         <span>Berita</span>
                     </a>
                 </li>
+
+                   <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('user.realtime_page') }}" data-title="Realtime">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>Live Data</span>
+                    </a>
+                </li>
             </ul>
         </div>
 
@@ -634,6 +641,11 @@
         <a class="mobile-bottom-link" href="{{ url_for('user.berita') }}" data-path="{{ url_for('user.berita') }}">
             <i class="bi bi-newspaper"></i>
             <span>Berita</span>
+        </a>
+
+          <a class="mobile-bottom-link" href="{{ url_for('user.realtime_page') }}" data-path="{{ url_for('user.realtime_page') }}">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>Live Data</span>
         </a>
     </nav>
 

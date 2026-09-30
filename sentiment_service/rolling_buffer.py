@@ -29,13 +29,11 @@ def update_rolling(berita_per_saham):
         new_df = pd.DataFrame(rows)
         df = pd.concat([df, new_df], ignore_index=True)
 
-        # 🔥 ANTI DUPLIKASI
         df = df.drop_duplicates(
             subset=["ticker", "link"],
             keep="last"
         )
 
-    # Rolling 7 hari
     df["date"] = pd.to_datetime(df["date"])
     cutoff = pd.Timestamp(today - timedelta(days=6))
     df = df[df["date"] >= cutoff]

@@ -1,15 +1,12 @@
-```html
 {% extends 'user/layout/base.html' %}
     <link rel="stylesheet" href="css/rangking.css">
 
 {% block content %}
-
-<!-- ================= PAGE HEADER ================= -->
 <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center mb-4 gap-3">
     <div>
         <h4 class="mb-1 fw-bold">Ranking Saham LQ45</h4>
         <p class="text-muted mb-0" style="font-size: 14px;">
-            Berdasarkan hasil perhitungan <span class="badge bg-light text-dark">Fuzzy Mamdani</span>
+            Berdasarkan hasil perhitungan pada saat closing harian 
         </p>
     </div>
 
@@ -48,7 +45,6 @@
     </div>
 </div>
 
-<!-- ================= SUMMARY DESKTOP ================= -->
 <div class="row g-3 mb-4 summary-desktop-grid">
     <div class="col-6 col-lg-4">
         <div class="dashboard-card card-blue p-3 h-100">
@@ -97,7 +93,6 @@
     </div>
 </div>
 
-<!-- ================= FILTERS ================= -->
 <div class="card shadow-sm border-0 rounded-4 p-3 mb-4 filter-card">
     <form method="GET" action="{{ url_for('user.ranking') }}">
         <div class="row g-3 align-items-center">

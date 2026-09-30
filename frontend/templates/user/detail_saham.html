@@ -5,11 +5,9 @@
 {% block content %}
 
 {% set fuzzy_score = detail.fuzzy_score or 0 %}
-{% set m = membership[0] if membership else none %}
+{% set m = membership if membership else none %}
 
 
-
-<!-- ================= HEADER ================= -->
 <div class="detail-header">
     <div class="d-flex align-items-center gap-3 position-relative">
         <div class="stock-avatar">
@@ -103,7 +101,7 @@
             <i class="bi bi-graph-up-arrow me-1"></i>
             1–4 Minggu
 
-        {% elif detail.horizon == "Hold Menengah" %}
+        {% elif detail.horizon == "hold menengah" %}
             <i class="bi bi-calendar-month me-1"></i>
             1–4 Bulan
 
@@ -117,6 +115,8 @@
         {% endif %}
 
     </span>
+
+    
 
 </div>
                 <span class="badge
@@ -140,7 +140,12 @@
                     Rp {{ "{:,.0f}".format(detail.close_price or 0) }}
                 </h2>
             </div>
+            <div class="mt-4 text-start">
+
+   
+</div>
         </div>
+        
     </div>
 
     <!-- DESKTOP INDICATORS -->
@@ -343,8 +348,254 @@
         </table>
     </div>
 </div>
+ <h6 class="fw-bold mb-3">
+        <i class="bi bi-lightbulb me-1"></i>
+        Analisis Pemilihan Horizon
+    </h6>
 
-<!-- ================= DESKTOP FUZZY ================= -->
+    {% set horizon = (detail.horizon or '')|lower %}
+
+    <!-- ========================= -->
+    <!-- ANALISIS SCALPING -->
+    <!-- ========================= -->
+    {% if horizon == 'scalping' %}
+
+        <div class="alert alert-success">
+            <strong>Mengapa Scalping dipilih?</strong>
+            <p class="mb-0 mt-2">
+                Sistem memilih horizon <strong>Scalping</strong> karena
+                hasil inferensi fuzzy menunjukkan bahwa kondisi teknikal
+                jangka sangat pendek lebih dominan dibandingkan horizon
+                lainnya. Sinyal dari indikator teknikal memberikan
+                dukungan terhadap peluang pergerakan harga dalam waktu
+                singkat.
+            </p>
+        </div>
+
+
+        <div class="mt-3">
+            <strong>Mengapa bukan horizon lainnya?</strong>
+            <ul class="mt-2">
+                <li>
+                    <strong>Fast Trade:</strong>
+                    sinyal yang dihasilkan sistem lebih dominan pada
+                    pergerakan sangat pendek.
+                </li>
+                <li>
+                    <strong>Swing Trade:</strong>
+                    kondisi tren belum cukup dominan untuk periode
+                    beberapa minggu.
+                </li>
+                <li>
+                    <strong>Hold Menengah:</strong>
+                    horizon lebih panjang tidak menjadi hasil dominan
+                    dari inferensi fuzzy.
+                </li>
+                <li>
+                    <strong>Hold Menengah-Panjang:</strong>
+                    indikator jangka panjang belum cukup kuat untuk
+                    mendukung horizon tersebut.
+                </li>
+            </ul>
+        </div>
+
+
+
+    {% elif horizon == 'fast trade' %}
+
+        <div class="alert alert-success">
+            <strong>Mengapa Fast Trade dipilih?</strong>
+            <p class="mb-0 mt-2">
+                Sistem memilih <strong>Fast Trade</strong> karena hasil
+                inferensi fuzzy menunjukkan adanya dukungan terhadap
+                pergerakan harga jangka pendek. Kondisi teknikal lebih
+                sesuai untuk posisi yang dipertahankan selama beberapa
+                hari bursa dibandingkan transaksi sangat cepat.
+            </p>
+        </div>
+
+    
+        <div class="mt-3">
+            <strong>Mengapa bukan horizon lainnya?</strong>
+            <ul class="mt-2">
+                <li>
+                    <strong>Scalping:</strong>
+                    momentum sangat pendek belum menjadi hasil dominan.
+                </li>
+                <li>
+                    <strong>Swing Trade:</strong>
+                    dukungan tren beberapa minggu belum cukup kuat.
+                </li>
+                <li>
+                    <strong>Hold Menengah:</strong>
+                    sistem masih memberikan bobot lebih besar terhadap
+                    peluang jangka pendek.
+                </li>
+                <li>
+                    <strong>Hold Menengah-Panjang:</strong>
+                    belum terdapat konfirmasi tren jangka panjang yang
+                    cukup kuat.
+                </li>
+            </ul>
+        </div>
+
+
+    <!-- ========================= -->
+    <!-- ANALISIS SWING TRADE -->
+    <!-- ========================= -->
+    {% elif horizon == 'swing trade' %}
+
+        <div class="alert alert-success">
+            <strong>Mengapa Swing Trade dipilih?</strong>
+            <p class="mb-0 mt-2">
+                Sistem memilih <strong>Swing Trade</strong> karena
+                kombinasi indikator teknikal menunjukkan peluang
+                pergerakan harga yang lebih sesuai untuk periode
+                beberapa minggu. Sinyal jangka pendek tidak cukup
+                dominan untuk menjadikan Scalping atau Fast Trade
+                sebagai horizon utama.
+            </p>
+        </div>
+
+    
+
+        <div class="mt-3">
+            <strong>Mengapa bukan horizon lainnya?</strong>
+            <ul class="mt-2">
+                <li>
+                    <strong>Scalping:</strong>
+                    momentum sangat pendek tidak cukup dominan.
+                </li>
+                <li>
+                    <strong>Fast Trade:</strong>
+                    sistem menunjukkan peluang yang lebih sesuai
+                    untuk pergerakan beberapa minggu.
+                </li>
+                <li>
+                    <strong>Hold Menengah:</strong>
+                    sinyal fundamental dan tren jangka panjang belum
+                    cukup dominan.
+                </li>
+                <li>
+                    <strong>Hold Menengah-Panjang:</strong>
+                    belum terdapat konfirmasi tren jangka panjang
+                    yang kuat.
+                </li>
+            </ul>
+        </div>
+
+
+    <!-- ========================= -->
+    <!-- ANALISIS HOLD MENENGAH -->
+    <!-- ========================= -->
+    {% elif horizon == 'hold menengah' %}
+
+        <div class="alert alert-success">
+            <strong>Mengapa Hold Menengah dipilih?</strong>
+
+            <p class="mb-0 mt-2">
+                Sistem memilih <strong>Hold Menengah</strong> karena
+                hasil inferensi fuzzy menunjukkan bahwa kondisi
+                fundamental dan teknikal lebih mendukung pembentukan
+                posisi dalam jangka menengah. Sinyal jangka pendek
+                belum cukup kuat untuk menghasilkan horizon perdagangan
+                yang lebih cepat, sedangkan kondisi jangka panjang
+                belum cukup kuat untuk menghasilkan Hold
+                Menengah-Panjang.
+            </p>
+        </div>
+
+   
+
+        <div class="mt-3">
+            <strong>Mengapa bukan horizon lainnya?</strong>
+
+            <ul class="mt-2">
+                <li>
+                    <strong>Scalping:</strong>
+                    kondisi momentum sangat pendek belum menjadi
+                    kombinasi fuzzy yang paling dominan.
+                </li>
+
+                <li>
+                    <strong>Fast Trade:</strong>
+                    sinyal jangka pendek belum cukup kuat dibandingkan
+                    kombinasi fundamental dan teknikal yang mendukung
+                    horizon menengah.
+                </li>
+
+                <li>
+                    <strong>Swing Trade:</strong>
+                    sistem tidak menghasilkan kekuatan inferensi
+                    yang lebih tinggi dibandingkan Hold Menengah.
+                </li>
+
+                <li>
+                    <strong>Hold Menengah-Panjang:</strong>
+                    indikator tren jangka panjang belum memberikan
+                    dukungan yang cukup kuat.
+                </li>
+            </ul>
+        </div>
+
+
+    <!-- ========================= -->
+    <!-- ANALISIS HOLD MENENGAH-PANJANG -->
+    <!-- ========================= -->
+    {% elif horizon == 'hold menengah-panjang' %}
+
+        <div class="alert alert-success">
+            <strong>Mengapa Hold Menengah-Panjang dipilih?</strong>
+
+            <p class="mb-0 mt-2">
+                Sistem memilih <strong>Hold Menengah-Panjang</strong>
+                karena hasil inferensi fuzzy menunjukkan kombinasi
+                fundamental dan tren jangka panjang yang relatif lebih
+                kuat dibandingkan horizon lainnya.
+            </p>
+        </div>
+
+   
+        <div class="mt-3">
+            <strong>Mengapa bukan horizon lainnya?</strong>
+
+            <ul class="mt-2">
+                <li>
+                    <strong>Scalping:</strong>
+                    peluang jangka sangat pendek bukan hasil inferensi
+                    paling dominan.
+                </li>
+
+                <li>
+                    <strong>Fast Trade:</strong>
+                    sistem memberikan bobot lebih besar terhadap
+                    kondisi fundamental dan tren yang lebih panjang.
+                </li>
+
+                <li>
+                    <strong>Swing Trade:</strong>
+                    kekuatan sinyal beberapa minggu masih berada di
+                    bawah horizon jangka menengah-panjang.
+                </li>
+
+                <li>
+                    <strong>Hold Menengah:</strong>
+                    kombinasi fundamental dan tren jangka panjang
+                    memberikan dukungan yang lebih kuat.
+                </li>
+            </ul>
+        </div>
+
+
+    {% else %}
+
+        <div class="alert alert-secondary">
+            Data horizon belum tersedia sehingga analisis pemilihan
+            horizon belum dapat ditampilkan.
+        </div>
+
+    {% endif %}
+
 <div class="card soft-card p-4 mt-4 desktop-fuzzy-card">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h6 class="fw-bold mb-0">Analisis Fuzzy Detail</h6>
@@ -428,7 +679,6 @@
     {% endif %}
 </div>
 
-<!-- ================= MOBILE FUZZY ================= -->
 <div class="mobile-data-table mt-3">
     <table>
         <thead>
@@ -452,7 +702,7 @@
     </table>
 </div>
 
-<!-- ================= NEWS ================= -->
+
 <div class="card soft-card news-card p-4 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h6 class="fw-bold mb-0">Berita Emiten</h6>
@@ -504,89 +754,91 @@
             Performance Return
         </h6>
 
-        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-            <span>1 Week</span>
-          <span class="badge
-{% if performance.week > 0 %}
-bg-success
-{% elif performance.week < 0 %}
-bg-danger
-{% else %}
-bg-secondary
-{% endif %}">
-{{ performance.week }}%
-</span>
-        </div>
+<div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+    <span>1 Week</span>
+    <span class="badge
+        {% if performance.get('week') is not none and performance.get('week') > 0 %}
+            bg-success
+        {% elif performance.get('week') is not none and performance.get('week') < 0 %}
+            bg-danger
+        {% else %}
+            bg-secondary
+        {% endif %}">
+        {% if performance.get('week') is not none %}{{ performance.week }}%{% else %}-{% endif %}
+    </span>
+</div>
 
-        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-            <span>1 Month</span>
-            <span class="badge
-                {% if performance.month > 0 %}
-                bg-success
-                {% elif performance.month < 0 %}
-                bg-danger
-                {% else %}
-                bg-secondary
-                {% endif %}">
-                {{ performance.month }}%
-            </span>
-        </div>
+<div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+    <span>1 Month</span>
+    <span class="badge
+        {% if performance.get('month') is not none and performance.get('month') > 0 %}
+            bg-success
+        {% elif performance.get('month') is not none and performance.get('month') < 0 %}
+            bg-danger
+        {% else %}
+            bg-secondary
+        {% endif %}">
+        {% if performance.get('month') is not none %}{{ performance.month }}%{% else %}-{% endif %}
+    </span>
+</div>
 
-        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-            <span>3 Month</span>
-            <span class="badge
-                {% if performance.quarter > 0 %}
-                bg-success
-                {% elif performance.quarter < 0 %}
-                bg-danger
-                {% else %}
-                bg-secondary
-                {% endif %}">
-                {{ performance.quarter }}%
-            </span>
-        </div>
+<div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+    <span>3 Month</span>
+    <span class="badge
+        {% if performance.get('quarter') is not none and performance.get('quarter') > 0 %}
+            bg-success
+        {% elif performance.get('quarter') is not none and performance.get('quarter') < 0 %}
+            bg-danger
+        {% else %}
+            bg-secondary
+        {% endif %}">
+        {% if performance.get('quarter') is not none %}{{ performance.quarter }}%{% else %}-{% endif %}
+    </span>
+</div>
 
-        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-            <span>6 Month</span>
-            <span class="badge
-                {% if performance.half > 0 %}
-                bg-success
-                {% elif performance.half < 0 %}
-                bg-danger
-                {% else %}
-                bg-secondary
-                {% endif %}">
-                {{ performance.half }}%
-            </span>
-        </div>
+<div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+    <span>6 Month</span>
+    <span class="badge
+        {% if performance.get('half') is not none and performance.get('half') > 0 %}
+            bg-success
+        {% elif performance.get('half') is not none and performance.get('half') < 0 %}
+            bg-danger
+        {% else %}
+            bg-secondary
+        {% endif %}">
+        {% if performance.get('half') is not none %}{{ performance.half }}%{% else %}-{% endif %}
+    </span>
+</div>
 
-   <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+<div class="d-flex justify-content-between align-items-center py-2 border-bottom">
     <span>YTD</span>
     <span class="badge
-        {% if performance.ytd > 0 %}
+        {% if performance.get('ytd') is not none and performance.get('ytd') > 0 %}
             bg-success
-        {% elif performance.ytd < 0 %}
+        {% elif performance.get('ytd') is not none and performance.get('ytd') < 0 %}
             bg-danger
         {% else %}
             bg-secondary
         {% endif %}">
-        {{ performance.ytd }}%
+        {% if performance.get('ytd') is not none %}{{ performance.ytd }}%{% else %}-{% endif %}
     </span>
 </div>
 
-<div class="d-flex justify-content-between align-items-center py-2">
+<div class="d-flex justify-content-between align-items-center py-2 border-bottom">
     <span>3 Year</span>
     <span class="badge
-        {% if performance.three_year > 0 %}
+        {% if performance.get('three_year') is not none and performance.get('three_year') > 0 %}
             bg-success
-        {% elif performance.three_year < 0 %}
+        {% elif performance.get('three_year') is not none and performance.get('three_year') < 0 %}
             bg-danger
         {% else %}
             bg-secondary
         {% endif %}">
-        {{ performance.three_year }}%
+        {% if performance.get('three_year') is not none %}{{ performance.three_year }}%{% else %}-{% endif %}
     </span>
 </div>
+
+
 
     </div>
 </div>
