@@ -47,22 +47,36 @@ def get_latest_stock_rows():
         x.Sektor,
 
         x.close_price,
+
         x.eps,
         x.per,
         x.roe,
         x.der,
         x.fcf,
 
+        x.ma20,
         x.ma50,
+        x.ma100,
         x.ma200,
+
         x.volume,
+
+        x.volma20,
+        x.volma50,
+        x.volma100,
         x.volma200,
-        x.rsi,
+
+        x.g_h1,
+        x.g_h5,
         x.gradient,
 
+        x.volume_ratio,
+
+        x.rsi,
         x.date
 
     FROM (
+
         SELECT
             sd.stockdata_id,
             sd.id_stock,
@@ -71,37 +85,32 @@ def get_latest_stock_rows():
             sl.sektor AS Sektor,
 
             sd.close_price,
+
             sd.eps,
             sd.per,
             sd.roe,
             sd.der,
             sd.fcf,
 
+            sd.ma20,
             sd.ma50,
+            sd.ma100,
             sd.ma200,
+
             sd.volume,
+
+            sd.volma20,
+            sd.volma50,
+            sd.volma100,
             sd.volma200,
+
+            sd.g_h1,
+            sd.g_h5,
+            sd.gradient,
+
+            sd.volume_ratio,
+
             sd.rsi,
-
-            (
-                sd.close_price
-                -
-                LAG(sd.close_price, 5)
-                OVER (
-                    PARTITION BY sd.id_stock
-                    ORDER BY sd.date
-                )
-            )
-            /
-            NULLIF(
-                LAG(sd.close_price, 5)
-                OVER (
-                    PARTITION BY sd.id_stock
-                    ORDER BY sd.date
-                ),
-                0
-            ) AS gradient,
-
             sd.date
 
         FROM stock_data sd
@@ -112,9 +121,13 @@ def get_latest_stock_rows():
     ) AS x
 
     WHERE x.date = (
+
         SELECT MAX(s2.date)
+
         FROM stock_data s2
+
         WHERE s2.id_stock = x.id_stock
+
     )
 
     ORDER BY x.ticker
@@ -646,76 +659,43 @@ def count_fuzzy_data(start_date, end_date):
         cursor.close()
         conn.close()
 
-def get_stock_rows_by_date(
-    start_date,
-    end_date
-):
+def get_stock_rows_by_date(start_date, end_date):
 
     conn = get_conn()
 
     sql = """
-    SELECT
-        x.stockdata_id,
-        x.id_stock,
-        x.ticker,
-        x.Sektor,
-
-        x.close_price,
-        x.eps,
-        x.per,
-        x.roe,
-        x.der,
-        x.fcf,
-
-        x.ma50,
-        x.ma200,
-        x.volume,
-        x.volma200,
-        x.rsi,
-        x.gradient,
-
-        x.date
-
-    FROM (
         SELECT
             sd.stockdata_id,
             sd.id_stock,
-
-            sl.ticker AS ticker,
+            sl.ticker,
             sl.sektor AS Sektor,
 
             sd.close_price,
+
             sd.eps,
             sd.per,
             sd.roe,
             sd.der,
             sd.fcf,
 
+            sd.ma20,
             sd.ma50,
+            sd.ma100,
             sd.ma200,
+
             sd.volume,
+
+            sd.volma20,
+            sd.volma50,
+            sd.volma100,
             sd.volma200,
+
+            sd.g_h1,
+            sd.g_h5,
+
+            sd.volume_ratio,
+
             sd.rsi,
-
-            (
-                sd.close_price
-                -
-                LAG(sd.close_price, 5)
-                OVER (
-                    PARTITION BY sd.id_stock
-                    ORDER BY sd.date
-                )
-            )
-            /
-            NULLIF(
-                LAG(sd.close_price, 5)
-                OVER (
-                    PARTITION BY sd.id_stock
-                    ORDER BY sd.date
-                ),
-                0
-            ) AS gradient,
-
             sd.date
 
         FROM stock_data sd
@@ -723,33 +703,22 @@ def get_stock_rows_by_date(
         JOIN stock_lq45 sl
             ON sd.id_stock = sl.id_stock
 
-    ) AS x
+        WHERE sd.date BETWEEN %s AND %s
 
-    WHERE x.date BETWEEN %s AND %s
-
-    ORDER BY
-        x.date,
-        x.ticker
+        ORDER BY
+            sd.date,
+            sl.ticker
     """
 
     try:
-
-        df = pd.read_sql(
+        return pd.read_sql(
             sql,
             conn,
-            params=(
-                start_date,
-                end_date
-            )
+            params=(start_date, end_date)
         )
 
-        return df
-
     finally:
-
         conn.close()
-
-
 
 def stock_date_exists(id_stock, tanggal):
     conn = get_conn()
@@ -930,5 +899,69 @@ def get_latest_realtime():
     try:
         df = pd.read_sql(sql, conn)
         return df
+    finally:
+        conn.close()
+
+
+def get_latest_stock_rows():
+
+    conn = get_conn()
+
+    sql = """
+        SELECT
+            sd.stockdata_id,
+            sd.id_stock,
+            sl.ticker,
+            sl.sektor AS Sektor,
+
+            sd.close_price,
+
+            sd.eps,
+            sd.per,
+            sd.roe,
+            sd.der,
+            sd.fcf,
+
+            sd.ma20,
+            sd.ma50,
+            sd.ma100,
+            sd.ma200,
+
+            sd.volume,
+
+            sd.volma20,
+            sd.volma50,
+            sd.volma100,
+            sd.volma200,
+
+            sd.g_h1,
+            sd.g_h5,
+
+            sd.volume_ratio,
+
+            sd.rsi,
+            sd.date
+
+        FROM stock_data sd
+
+        JOIN stock_lq45 sl
+            ON sd.id_stock = sl.id_stock
+
+        INNER JOIN (
+            SELECT
+                id_stock,
+                MAX(date) AS latest_date
+            FROM stock_data
+            GROUP BY id_stock
+        ) latest
+            ON sd.id_stock = latest.id_stock
+            AND sd.date = latest.latest_date
+
+        ORDER BY sl.ticker
+    """
+
+    try:
+        return pd.read_sql(sql, conn)
+
     finally:
         conn.close()

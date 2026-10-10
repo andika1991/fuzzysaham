@@ -16,7 +16,7 @@ from db import (
 
 from datetime import datetime, date
 from functools import wraps
-
+import numpy as np
 import os
 from dotenv import load_dotenv
 
@@ -823,27 +823,31 @@ def run_realtime_api():
             "message": str(e)
         }), 500
 
+
+
 @app.route("/realtime/latest", methods=["GET"])
 @require_api_key
 def realtime_latest_api():
-
     try:
-
-        data = get_latest_realtime()
-
+        df = get_latest_realtime()
+        if df is None or df.empty:
+            return jsonify({
+                "status": "success",
+                "total": 0,
+                "data": []
+            })
+        df = df.replace({np.nan: None})
+        data = df.to_dict(orient="records")
         return jsonify({
             "status": "success",
             "total": len(data),
             "data": data
         })
-
     except Exception as e:
-
         return jsonify({
             "status": "error",
             "message": str(e)
         }), 500
-# ============================================================
 # RUN APPLICATION
 # ============================================================
 

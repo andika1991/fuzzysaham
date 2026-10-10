@@ -60,7 +60,7 @@ class RuleModel:
             data.get('fcf'),
             data.get('ma50'),
             data.get('ma200'),
-            data.get('gradien'),
+            data.get('gradient'),
             data.get('volume'),
             data.get('rsi'),
             data.get('sentimen'),

@@ -314,3 +314,44 @@ def save_sentiment_daily(
 
         if conn is not None and conn.is_connected():
             conn.close()
+
+
+
+# ============================================================
+# AMBIL SEMUA LINK BERITA YANG SUDAH ADA
+# ============================================================
+
+def get_existing_news_links():
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        sql = """
+        SELECT DISTINCT link
+        FROM sentiment_emiten_detail
+        WHERE link IS NOT NULL
+          AND link != ''
+        """
+
+        cursor.execute(sql)
+
+        return {
+            row[0].strip()
+            for row in cursor.fetchall()
+            if row[0]
+        }
+
+    except Error as e:
+        print(f"[DB ERROR] get_existing_news_links: {e}")
+        return None
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+
+        if conn is not None and conn.is_connected():
+            conn.close()

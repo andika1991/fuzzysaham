@@ -130,28 +130,60 @@ class FuzzyMamdaniEngine:
             "bull": float(tri_right(d, 0.0, 0.02))
         }
 
-    def gradient_mb(self, g):
-        if pd.isna(g):
-            return {"negatif": 0.0, "netral": 0.0, "positif": 0.0}
+    def gradient_mb(self, g_h1, g_h5):
+
+        if pd.isna(g_h1) and pd.isna(g_h5):
+            return {
+                "negatif": 0.0,
+                "netral": 0.0,
+                "positif": 0.0
+            }
+
+        if pd.isna(g_h1):
+            g = g_h5
+
+        elif pd.isna(g_h5):
+            g = g_h1
+
+        else:
+            g = (
+                0.70 * g_h1 +
+                0.30 * g_h5
+            )
 
         return {
-            "negatif": float(tri_left(g, -0.01, 0.0)),
-            "netral": float(tent(g, -0.01, 0.0, 0.01)),
-            "positif": float(tri_right(g, 0.0, 0.01))
-        }
+            "negatif": float(
+                tri_left(g, -0.01, 0.0)
+            ),
+            "netral": float(
+                tent(g, -0.01, 0.0, 0.01)
+            ),
+            "positif": float(
+                tri_right(g, 0.0, 0.01)
+            )
+    }
 
-    def volume_mb(self, v, vma):
-        if pd.isna(v) or pd.isna(vma) or vma == 0:
-            return {"low": 0.0, "mid": 0.0, "high": 0.0}
+    def volume_mb(self, volume_ratio):
+        if pd.isna(volume_ratio):
+            return {
+                "low": 0.0,
+                "mid": 0.0,
+                "high": 0.0
+            }
 
-        d = (v - vma) / vma
+        d = float(volume_ratio)
 
         return {
-            "low": float(tri_left(d, -0.20, 0.0)),
-            "mid": float(tent(d, -0.20, 0.0, 0.20)),
-            "high": float(tri_right(d, 0.0, 0.20))
+            "low": float(
+                tri_left(d, -0.20, 0.0)
+            ),
+            "mid": float(
+                tent(d, -0.20, 0.0, 0.20)
+            ),
+            "high": float(
+                tri_right(d, 0.0, 0.20)
+            )
         }
-
     def rsi_mb(self, r):
         if pd.isna(r):
             return {"oversold": 0.0, "netral": 0.0, "overbought": 0.0}
@@ -240,63 +272,136 @@ class FuzzyMamdaniEngine:
         return ", ".join(parts) if parts else None
 
     def evaluate(self, row: pd.Series):
-        sector = str(self._get_value(row, "Sektor", "SEKTOR", "sector", "Sector", default="")).strip()
+
+        sector = str(
+            self._get_value(
+                row,
+                "Sektor",
+                "SEKTOR",
+                "sector",
+                "Sector",
+                default=""
+            )
+        ).strip()
 
         if sector in self.sector_stats.index:
             stats = self.sector_stats.loc[sector]
         else:
-            stats = self.sector_stats.mean(numeric_only=True)
+            stats = self.sector_stats.mean(
+                numeric_only=True
+            )
 
-        close_price = self._get_value(row, "close_price", "Close", "harga", "Harga")
-        gradien_value = self._get_value(row, "gradien", "gradient", "GRADIEN", "GRADIENT")
-        sent_v = self._get_value(row, "sent_v", "sentimen_v", "sentiment_value", default=0.5)
+        close_price = self._get_value(
+            row,
+            "close_price",
+            "Close",
+            "harga",
+            "Harga"
+        )
+
+        g_h1 = self._get_value(
+            row,
+            "g_h1",
+            "G_H1"
+        )
+
+        g_h5 = self._get_value(
+            row,
+            "g_h5",
+            "G_H5"
+        )
+
+        sent_v = self._get_value(
+            row,
+            "sent_v",
+            "sentimen_v",
+            "sentiment_value",
+            default=0.5
+        )
+
+        volume_ratio = self._get_value(
+            row,
+            "volume_ratio",
+            "VOLUME_RATIO",
+            default=np.nan
+        )
 
         # ===============================
         # HITUNG MEMBERSHIP
         # ===============================
+
         mbs = {
+
             "EPS": self.stat_mb(
                 self._get_value(row, "eps", "EPS"),
                 stats.get("eps_mean"),
                 stats.get("eps_std")
             ),
+
             "PER": self.stat_mb(
                 self._get_value(row, "per", "PER"),
                 stats.get("per_mean"),
                 stats.get("per_std")
             ),
+
             "ROE": self.stat_mb(
                 self._get_value(row, "roe", "ROE"),
                 stats.get("roe_mean"),
                 stats.get("roe_std")
             ),
+
             "FCF": self.stat_mb(
                 self._get_value(row, "fcf", "FCF"),
                 stats.get("fcf_mean"),
                 stats.get("fcf_std")
             ),
+
             "DER": self.stat_mb(
                 self._get_value(row, "der", "DER"),
                 stats.get("der_mean"),
                 stats.get("der_std")
             ),
+
             "MA50": self.ma_mb(
                 close_price,
-                self._get_value(row, "ma50", "MA50")
+                self._get_value(
+                    row,
+                    "ma50",
+                    "MA50"
+                )
             ),
+
             "MA200": self.ma_mb(
                 close_price,
-                self._get_value(row, "ma200", "MA200")
+                self._get_value(
+                    row,
+                    "ma200",
+                    "MA200"
+                )
             ),
-            "GRADIEN": self.gradient_mb(gradien_value),
-            "GRADIENT": self.gradient_mb(gradien_value),
+
+            "GRADIEN": self.gradient_mb(
+                g_h1,
+                g_h5
+            ),
+
+            "GRADIENT": self.gradient_mb(
+                g_h1,
+                g_h5
+            ),
+
             "VOLUME": self.volume_mb(
-                self._get_value(row, "volume", "Volume", "VOLUME"),
-                self._get_value(row, "volma200", "VolMA200", "VOLMA200")
+                volume_ratio
             ),
+
             "RSI": self.rsi_mb(
-                self._get_value(row, "rsi", "RSI")
+                self._get_value(
+                    row,
+                    "rsi",
+                    "RSI"
+                )
             ),
+
             "SENTIMEN": {
                 "negatif": 1.0 if sent_v == 0.0 else 0.0,
                 "netral": 1.0 if sent_v == 0.5 else 0.0,

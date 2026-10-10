@@ -16,11 +16,23 @@ def save_stock_realtime(
 
     close_price=None,
     volume=None,
+
+    ma20=None,
     ma50=None,
+    ma100=None,
     ma200=None,
+
+    volma20=None,
+    volma50=None,
+    volma100=None,
     volma200=None,
-    rsi=None,
+
+    g_h1=None,
+    g_h5=None,
     gradient=None,
+    volume_ratio=None,
+
+    rsi=None,
 
     sentimen=None,
 
@@ -48,11 +60,23 @@ def save_stock_realtime(
 
             close_price,
             volume,
+
+            ma20,
             ma50,
+            ma100,
             ma200,
+
+            volma20,
+            volma50,
+            volma100,
             volma200,
-            rsi,
+
+            g_h1,
+            g_h5,
             gradient,
+            volume_ratio,
+
+            rsi,
 
             sentimen,
 
@@ -68,7 +92,15 @@ def save_stock_realtime(
 
             %s, %s, %s, %s, %s,
 
-            %s, %s, %s, %s, %s, %s, %s,
+            %s, %s,
+
+            %s, %s, %s, %s,
+
+            %s, %s, %s, %s,
+
+            %s, %s, %s, %s,
+
+            %s,
 
             %s,
 
@@ -79,7 +111,10 @@ def save_stock_realtime(
     """
 
     membership_json = (
-        json.dumps(membership, ensure_ascii=False)
+        json.dumps(
+            membership,
+            ensure_ascii=False
+        )
         if membership is not None
         else None
     )
@@ -96,11 +131,23 @@ def save_stock_realtime(
 
         close_price,
         volume,
+
+        ma20,
         ma50,
+        ma100,
         ma200,
+
+        volma20,
+        volma50,
+        volma100,
         volma200,
-        rsi,
+
+        g_h1,
+        g_h5,
         gradient,
+        volume_ratio,
+
+        rsi,
 
         sentimen,
 
@@ -112,7 +159,10 @@ def save_stock_realtime(
         membership_json
     )
 
-    cur.execute(sql, values)
+    cur.execute(
+        sql,
+        values
+    )
 
     realtime_id = cur.lastrowid
 
@@ -122,6 +172,7 @@ def save_stock_realtime(
     conn.close()
 
     return realtime_id
+
 
 def get_latest_realtime():
     sql = """
@@ -245,99 +296,31 @@ def get_previous_realtime(ticker, current_id):
     return result
 
 def get_latest_realtime():
-
-    conn = get_conn()
-
     sql = """
         SELECT
-            sr.id_realtime,
-            sr.id_stock,
-
+            sr.*,
             sl.ticker,
             sl.nama_perusahaan,
-            sl.sektor,
-
-            sr.snapshot_at,
-
-            /* =========================
-               FUNDAMENTAL
-               ========================= */
-
-            sr.eps,
-            sr.per,
-            sr.roe,
-            sr.der,
-            sr.fcf,
-
-            /* =========================
-               TEKNIKAL
-               ========================= */
-
-            sr.close_price,
-            sr.volume,
-            sr.ma50,
-            sr.ma200,
-            sr.volma200,
-            sr.rsi,
-            sr.gradient,
-
-            /* =========================
-               SENTIMEN
-               ========================= */
-
-            sr.sentimen,
-
-            /* =========================
-               FUZZY
-               ========================= */
-
-            sr.membership,
-            sr.fuzzy_score,
-            sr.kategori,
-            sr.horizon,
-
-            /* =========================
-               RULE
-               ========================= */
-
-            sr.insight,
-
-            sr.created_at
-
+            sl.sektor
         FROM stock_realtime sr
-
-        INNER JOIN stock_lq45 sl
+        JOIN stock_lq45 sl
             ON sr.id_stock = sl.id_stock
-
         INNER JOIN (
             SELECT
                 id_stock,
                 MAX(snapshot_at) AS latest_snapshot
-
             FROM stock_realtime
-
             GROUP BY id_stock
         ) latest
-
             ON sr.id_stock = latest.id_stock
             AND sr.snapshot_at = latest.latest_snapshot
-
-        ORDER BY
-            sr.fuzzy_score DESC,
-            sl.ticker ASC
+        ORDER BY sr.fuzzy_score DESC
     """
 
+    conn = get_conn()
+
     try:
-
-        cur = conn.cursor(dictionary=True)
-
-        cur.execute(sql)
-
-        rows = cur.fetchall()
-
-        return rows
-
+        df = pd.read_sql(sql, conn)
+        return df
     finally:
-
-        cur.close()
         conn.close()
