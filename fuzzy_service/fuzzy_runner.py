@@ -242,16 +242,18 @@ def run_fuzzy(
         ticker = row["ticker"]
 
         stockdata_id = row["stockdata_id"]
-
-
-        # =================================================
-        # SENTIMEN
-        # =================================================
-
+        tanggal_saham = pd.to_datetime(row["date"]).date()
         row["sent_v"] = get_sentiment_value(
-            ticker
+            ticker,
+            tanggal_saham
         )
-
+        print(
+            f"[DEBUG SENTIMEN INPUT] "
+            f"{ticker} | "
+            f"Tanggal saham={row.get('date')} | "
+            f"sent_v={row['sent_v']!r} | "
+            f"tipe={type(row['sent_v']).__name__}"
+        )
 
         # =================================================
         # DEBUG INPUT
@@ -291,7 +293,11 @@ def run_fuzzy(
             row
         )
 
-
+        print(
+            f"[DEBUG MEMBERSHIP SENTIMEN] "
+            f"{ticker} | "
+            f"{res['mbs'].get('SENTIMEN')}"
+        )
         # =================================================
         # DEBUG FUZZY
         # =================================================

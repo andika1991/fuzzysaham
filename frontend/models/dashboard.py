@@ -39,90 +39,134 @@ class DashboardModel:
 
         return row["last_update"]
     
+
     @staticmethod
     def get_total_rekomendasi():
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("""
-        SELECT COUNT(*) AS total_rekomendasi
-        FROM fuzzy_output
-        WHERE kategori = 'Potensial'
-        AND DATE(created_at) = (
-            SELECT DATE(MAX(created_at))
-            FROM fuzzy_output
-        )
-    """)
+        try:
+            cursor.execute("""
+                SELECT COUNT(*) AS total_rekomendasi
+                FROM (
+                    SELECT sd.id_stock
+                    FROM fuzzy_output f
+                    JOIN stock_data sd
+                        ON sd.stockdata_id = f.stockdata_id
+                    JOIN (
+                        SELECT id_stock, MAX(DATE(date)) AS tanggal_terakhir
+                        FROM stock_data
+                        GROUP BY id_stock
+                    ) latest
+                        ON latest.id_stock = sd.id_stock
+                        AND DATE(sd.date) = latest.tanggal_terakhir
+                    JOIN (
+                        SELECT stockdata_id, MAX(output_id) AS output_terakhir
+                        FROM fuzzy_output
+                        GROUP BY stockdata_id
+                    ) fo_latest
+                        ON fo_latest.stockdata_id = f.stockdata_id
+                        AND fo_latest.output_terakhir = f.output_id
+                    WHERE f.kategori = 'Potensial'
+                    GROUP BY sd.id_stock
+                ) AS rekomendasi
+            """)
 
-        result = cursor.fetchone()
+            result = cursor.fetchone()
+            return result["total_rekomendasi"] or 0
 
-        cursor.close()
-        conn.close()
+        finally:
+            cursor.close()
+            conn.close()
 
-        return result["total_rekomendasi"]
-    
+
     @staticmethod
     def toprank():
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("""
-            SELECT
-                l.ticker,
-                f.fuzzy_score
-            FROM fuzzy_output f
-            JOIN stock_data sd
-                ON sd.stockdata_id = f.stockdata_id
-            JOIN stock_lq45 l
-                ON l.id_stock = sd.id_stock
-            WHERE f.kategori = 'Potensial'
-            AND DATE(f.created_at) = (
-                SELECT DATE(MAX(created_at))
-                FROM fuzzy_output
-            )
-            ORDER BY f.fuzzy_score DESC
-            LIMIT 1
-        """)
+        try:
+            cursor.execute("""
+                SELECT
+                    l.ticker,
+                    f.fuzzy_score,
+                    f.kategori,
+                    f.horizon,
+                    sd.date AS tanggal
+                FROM fuzzy_output f
+                JOIN stock_data sd
+                    ON sd.stockdata_id = f.stockdata_id
+                JOIN stock_lq45 l
+                    ON l.id_stock = sd.id_stock
+                JOIN (
+                    SELECT id_stock, MAX(DATE(date)) AS tanggal_terakhir
+                    FROM stock_data
+                    GROUP BY id_stock
+                ) latest
+                    ON latest.id_stock = sd.id_stock
+                    AND DATE(sd.date) = latest.tanggal_terakhir
+                JOIN (
+                    SELECT stockdata_id, MAX(output_id) AS output_terakhir
+                    FROM fuzzy_output
+                    GROUP BY stockdata_id
+                ) fo_latest
+                    ON fo_latest.stockdata_id = f.stockdata_id
+                    AND fo_latest.output_terakhir = f.output_id
+                WHERE f.kategori = 'Potensial'
+                ORDER BY f.fuzzy_score DESC
+                LIMIT 1
+            """)
 
-        top_rank = cursor.fetchone()
+            return cursor.fetchone()
 
-        cursor.close()
-        conn.close()
+        finally:
+            cursor.close()
+            conn.close()
 
-        return top_rank
-    
+
     @staticmethod
     def get_top5_ranking():
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("""
-            SELECT
-                l.ticker,
-                f.fuzzy_score,
-                f.kategori,
-                f.horizon
-            FROM fuzzy_output f
-            JOIN stock_data sd
-                ON sd.stockdata_id = f.stockdata_id
-            JOIN stock_lq45 l
-                ON l.id_stock = sd.id_stock
-            WHERE DATE(f.created_at) = (
-                SELECT DATE(MAX(created_at))
-                FROM fuzzy_output
-            )
-            AND f.kategori = 'Potensial'
-            ORDER BY f.fuzzy_score DESC
-            LIMIT 5
-        """)
+        try:
+            cursor.execute("""
+                SELECT
+                    l.ticker,
+                    f.fuzzy_score,
+                    f.kategori,
+                    f.horizon,
+                    sd.date AS tanggal
+                FROM fuzzy_output f
+                JOIN stock_data sd
+                    ON sd.stockdata_id = f.stockdata_id
+                JOIN stock_lq45 l
+                    ON l.id_stock = sd.id_stock
+                JOIN (
+                    SELECT id_stock, MAX(DATE(date)) AS tanggal_terakhir
+                    FROM stock_data
+                    GROUP BY id_stock
+                ) latest
+                    ON latest.id_stock = sd.id_stock
+                    AND DATE(sd.date) = latest.tanggal_terakhir
+                JOIN (
+                    SELECT stockdata_id, MAX(output_id) AS output_terakhir
+                    FROM fuzzy_output
+                    GROUP BY stockdata_id
+                ) fo_latest
+                    ON fo_latest.stockdata_id = f.stockdata_id
+                    AND fo_latest.output_terakhir = f.output_id
+                WHERE f.kategori = 'Potensial'
+                ORDER BY f.fuzzy_score DESC
+                LIMIT 5
+            """)
 
-        result = cursor.fetchall()
+            return cursor.fetchall()
 
-        cursor.close()
-        conn.close()
+        finally:
+            cursor.close()
+            conn.close()
 
-        return result
-    
     @staticmethod
     def get_top_gainer():
         conn = get_db()

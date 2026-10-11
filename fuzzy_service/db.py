@@ -155,28 +155,64 @@ def get_fuzzy_rules():
     return df
 
 
+from collections import Counter
 
-def get_sentiment_value(ticker):
+def get_sentiment_value(ticker, tanggal=None):
     sql = """
-    SELECT sentiment
-    FROM sentiment_emiten_daily
-    WHERE ticker=%s
-    ORDER BY date DESC
-    LIMIT 1
+        SELECT date, sentiment
+        FROM sentiment_emiten_daily
+        WHERE ticker = %s
     """
+
+    params = [ticker]
+
+    if tanggal is not None:
+        sql += " AND DATE(date) <= %s"
+        params.append(pd.to_datetime(tanggal).date())
+
+    sql += """
+        ORDER BY date DESC
+        LIMIT 1
+    """
+
     conn = get_conn()
-    cur = conn.cursor()
-    cur.execute(sql, (ticker,))
-    row = cur.fetchone()
-    conn.close()
 
-    if not row:
-        return 0.5
+    try:
+        cur = conn.cursor()
+        cur.execute(sql, tuple(params))
+        row = cur.fetchone()
 
-    return {"positif":1.0, "netral":0.5, "negatif":0.0}.get(row[0], 0.5)
+        if not row or row[1] is None:
+            print(
+                f"[SENTIMEN] {ticker} | "
+                f"Tidak ada data hingga {tanggal}"
+            )
+            return 0.5
 
+        label = str(row[1]).strip().lower()
 
+        mapping = {
+            "positif": 1.0,
+            "positive": 1.0,
+            "netral": 0.5,
+            "neutral": 0.5,
+            "negatif": 0.0,
+            "negative": 0.0
+        }
 
+        value = mapping.get(label, 0.5)
+
+        print(
+            f"[SENTIMEN] {ticker} | "
+            f"Tanggal saham={tanggal} | "
+            f"Tanggal sentimen={row[0]} | "
+            f"Label={label} | Nilai={value}"
+        )
+
+        return value
+
+    finally:
+        conn.close()
 
 
 def save_fuzzy_membership(stockdata_id, mbs):
