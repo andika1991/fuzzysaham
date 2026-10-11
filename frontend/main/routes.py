@@ -147,10 +147,10 @@ def konsultasi():
 
 from openai import OpenAI
 
+
 @user_bp.route("/chat", methods=["POST"])
 @login_required
 def chat():
-
     data = request.get_json()
     user_message = data.get("message")
     conversation_id = data.get("conversation_id")
@@ -163,21 +163,27 @@ def chat():
         "user",
         user_message
     )
-    api_key = os.getenv("CHAT_KEY")  # Ambil API key dari environment variable
-    
 
-    # OpenRouter
+    # API key Groq
+    api_key = os.getenv("CHAT_KEY")
+
     client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
+        base_url="https://api.groq.com/openai/v1",
         api_key=api_key
     )
 
     response = client.chat.completions.create(
-        model="inclusionai/ling-3.0-flash-sante:free",
+        model="openai/gpt-oss-20b",
         messages=[
             {
                 "role": "system",
-                "content": "Kamu adalah asisten investasi saham LQ45."
+                "content": (
+                    "Kamu adalah asisten investasi saham LQ45. "
+                    "Berikan jawaban yang jelas, terstruktur, dan mudah dipahami. "
+                    "Jelaskan analisis saham berdasarkan data yang tersedia. "
+                    "Jangan mengarang harga saham atau data pasar. "
+                    "Sampaikan risiko investasi dan jangan menjanjikan keuntungan."
+                )
             },
             {
                 "role": "user",
